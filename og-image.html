@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1200px;
+    height: 630px;
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: 'Inter', -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 80px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(48, 54, 61, 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(48, 54, 61, 0.3) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 28px;
+    color: #e6edf3;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .logo span { color: #8b949e; font-weight: 400; }
+
+  h1 {
+    font-size: 64px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .points {
+    display: flex;
+    gap: 32px;
+    position: relative;
+  }
+
+  .point {
+    flex: 1;
+    background: rgba(22, 27, 34, 0.8);
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 20px 24px;
+  }
+
+  .point .icon {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: #3fb950;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .point h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .point p {
+    font-size: 14px;
+    color: #8b949e;
+    line-height: 1.5;
+  }
+
+  .footer {
+    position: absolute;
+    bottom: 40px;
+    left: 80px;
+    right: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: #6e7681;
+  }
+  .footer .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #3fb950;
+    background: rgba(63, 185, 80, 0.15);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="logo">sodide <span>— markdown-driven development</span></div>
+
+<h1>Plan. Launch. Verify.</h1>
+
+<div class="points">
+  <div class="point">
+    <span class="icon">01</span>
+    <h3>Specs are the interface</h3>
+    <p>Write requirements in markdown. Your .spec.md files define scope, patterns, and intent.</p>
+  </div>
+  <div class="point">
+    <span class="icon">02</span>
+    <h3>Launch agents from the UI</h3>
+    <p>Click a requirement, an agent starts building — scoped to your spec, patterns enforced.</p>
+  </div>
+  <div class="point">
+    <span class="icon">03</span>
+    <h3>Evidence gates every merge</h3>
+    <p>Test counts, blast radius, scope compliance — inline in your spec. Nothing merges on vibes.</p>
+  </div>
+</div>
+
+<div class="footer">
+  <span>cargo install sodide</span>
+  <span class="badge">● spec-driven development</span>
+</div>
+
+</body>
+</html>
