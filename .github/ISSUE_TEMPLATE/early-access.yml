@@ -1,0 +1,70 @@
+name: Early Access Request
+description: Request early access to sodide
+title: "Early Access: "
+labels: ["early-access"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your interest in sodide! A few quick questions so we can understand what you're looking for.
+
+  - type: input
+    id: building
+    attributes:
+      label: What are you building?
+      description: Language/framework, rough project size, solo or team
+      placeholder: "e.g. Python/FastAPI backend, 3-person team, ~50k LOC"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-workflow
+    attributes:
+      label: How do you work with AI agents today?
+      description: Which agents do you use? What does your workflow look like?
+      placeholder: "e.g. Claude Code for features, Cursor for quick edits, manual code review on every PR"
+    validations:
+      required: true
+
+  - type: textarea
+    id: pain
+    attributes:
+      label: What's broken about that workflow?
+      description: What problem would you want sodide to solve?
+      placeholder: "e.g. Agents go off-scope, tests pass but don't actually verify anything, code review takes forever"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: features
+    attributes:
+      label: Which features pulled you in?
+      description: Check all that apply
+      options:
+        - label: Specs as the interface (markdown-driven development)
+        - label: Launch agents directly from the UI
+        - label: Evidence-based gating (nothing merges on vibes)
+        - label: Scope enforcement and blast radius tracking
+        - label: Pattern assertions (architectural guardrails)
+        - label: Parallel agent execution in isolated worktrees
+        - label: Local-first, no SaaS
+    validations:
+      required: true
+
+  - type: textarea
+    id: first-try
+    attributes:
+      label: What would you try first?
+      description: If you had sodide today, what's the first thing you'd point it at?
+      placeholder: "e.g. I'd write a spec for our auth module and see if the agent stays in scope"
+    validations:
+      required: true
+
+  - type: input
+    id: contact
+    attributes:
+      label: Best way to reach you (optional)
+      description: Email, Twitter/X, or Discord handle if you'd like us to reach out directly
+      placeholder: "e.g. @handle or email"
+    validations:
+      required: false
