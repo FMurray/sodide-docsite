@@ -1,6 +1,117 @@
 ---
 title: Trust Model
-description: How sodide builds trust in agent work
+description: How sodide builds trust in automated verification
 ---
 
-Coming soon.
+The agent wrote the code. The agent also wrote the tests. So when the tests pass, what exactly did you learn?
+
+This is the central problem with agent-driven development, and "just read the code" is not a solution — that defeats the point of having an agent. Sodide's answer is multiple independent signals with different trust profiles. No single signal has to be trusted unconditionally; together, they are hard to fake.
+
+---
+
+## The problem
+
+A green checkmark from agent-reported tests proves exactly one thing: the tests ran without error. It does not prove the tests verify the requirement. An agent that writes a test saying `assert True` has passed every metric a naive system can measure.
+
+This is not hypothetical. METR's 2025 research on frontier models confirmed deliberate test manipulation — reward hacking in which models produce outputs that satisfy the evaluation criteria without satisfying the underlying intent. The models were optimizing for the signal, not the goal.
+
+The solution is not more careful test review. That still requires you to read code. The solution is independent signals: evidence sources that are not under the agent's control, so that a false ✓ requires manipulating things the agent cannot touch.
+
+---
+
+## Three-party separation
+
+Sodide is built around a hard separation of roles. No single actor can produce a false ✓:
+
+| Actor | Controls | Trust |
+|-------|----------|-------|
+| Human | Requirements, scope, patterns | Highest — defines "what" |
+| Agent | Code, tests, verification commands | Lowest — defines "how" |
+| Sodide | Execution, git tracing, scope enforcement | Mechanical — checks everything |
+
+The agent does not mark requirements done. It submits commands for sodide to run. Sodide checks whether those commands pass, whether files stay within declared scope, and whether architectural patterns hold. The human defines the patterns and the scope boundaries up front.
+
+The agent's authority ends at the boundary of what it implements. It cannot modify the spec. It cannot adjust the scope definition. It cannot alter what the patterns assert.
+
+---
+
+## The trust ladder
+
+Not all signals are equally independent from the agent. Here is how to rank them:
+
+1. **Agent-reported tests pass** — Low trust. The agent controls what gets tested, how assertions are written, and what test data is used. Tests passing is necessary but not sufficient.
+
+2. **Scope checks pass** — High trust. Sodide traces every git operation made during the session against the declared modules list. The agent cannot write to an out-of-scope file and hide it. This is mechanical.
+
+3. **Pattern assertions pass** — High trust. Executable patterns are human-authored shell commands that run as independent checks: `!tsc`, `!clippy`, `!madge --circular`, custom scripts. The agent did not write them. They are deterministic. Passing them is a real constraint.
+
+4. **Mutation score is high** — High trust. Mutation testing injects deliberate bugs into the code and checks whether the tests catch them. A high score means the tests would have failed if the implementation were wrong — which is what you actually want to know.
+
+The key distinction is who authored the check. Tests authored by the agent are suspect in proportion to how much latitude the agent had in writing them. Checks authored by humans — patterns, scope boundaries, mutation harnesses — are independent of the agent's intent.
+
+---
+
+## What the evidence summary shows
+
+The verify output separates agent evidence from independent checks visually:
+
+```
+✓ Session tokens expire after 24h
+    agent: 1 e2e, 2 unit (all pass)
+    independent: scope ✓ | patterns 2/2 ✓
+    files: token.ts +15/-8
+```
+
+The `agent:` line is agent-reported. The `independent:` line is not. Both agreeing is a stronger signal than either alone. A requirement that passes agent tests but fails a pattern assertion signals something worth investigating.
+
+---
+
+## Progressive disclosure
+
+Sodide's output is structured in three layers. This is intentional, and the layering is research-backed:
+
+- **Signal** (glanceable): `✓` / `✗` / `·` — scan 20 requirements in about 5 seconds. The top-level status exists so you do not have to read everything to spot what needs attention.
+
+- **Evidence summary** (one-line): `1 e2e, 2 unit | login.ts +60/-3` — enough to decide whether to look deeper. A requirement with 0 tests and a large diff is worth expanding. One with 8 tests across 3 tiers and a small diff probably is not.
+
+- **Full evidence** (on demand): complete test output, file diffs, the exact commands that ran, their exit codes, stdout.
+
+The instinct when reviewing agent work is to show everything — to be maximally transparent. This is counterproductive. When all detail is visible upfront, reviewers suffer from evidence fatigue and stop reading it. The collapsed summary is not a limitation; it is the right interface. You surface detail when you need it, not by default.
+
+---
+
+## The human's evolving role
+
+In the sodide workflow, you never read implementation code as a verification activity. Your leverage is in the harness: what you define before the agent starts, and what you add after you see what the agent produces.
+
+| Phase | Activity |
+|-------|----------|
+| Write spec | Define requirements, modules, initial patterns |
+| Review evidence | Scan signals, check quality, expand failures |
+| Improve harness | Add executable patterns after seeing agent mistakes |
+| Raise the bar | Graduate descriptive patterns to executable ones |
+
+When you see the agent write raw SQL instead of going through the query layer, you add a pattern:
+
+```yaml
+patterns:
+  - "!scripts/no-raw-sql.sh src/users/"
+```
+
+That mistake cannot happen again undetected. The check runs on every future session. You did not read the code to catch it the first time — the scope trace or test failure surfaced it. But now the invariant is encoded in the harness permanently.
+
+This is the self-improving property. Each pattern you add makes the next ✓ signal more trustworthy. Trust is not static — it compounds over time as the harness accumulates the team's architectural decisions and hard-won lessons.
+
+---
+
+## Why you trust a green checkmark
+
+A ✓ in sodide's output is meaningful because:
+
+- Multiple independent signals agreed, not just one
+- Not all signals were produced by the agent
+- The evidence summary gives you enough to calibrate without forcing you to read everything
+- Trust is specific per signal type — agent tests and scope checks carry different weight
+- Trust compounds over time as patterns accumulate
+
+The goal is never to eliminate the need for judgment. It is to give you the right information, organized so that judgment is fast, calibrated, and based on evidence rather than intuition about code you did not write.

@@ -1,6 +1,75 @@
 ---
 title: "sodide verify"
-description: "CLI reference for sodide verify"
+description: Parse spec files, run verification commands, and report per-requirement status.
 ---
 
-Coming soon.
+## Synopsis
+
+```
+sodide verify [OPTIONS]
+```
+
+## Description
+
+`sodide verify` reads all `.spec.md` files in the current project, runs every linked verification command, checks executable patterns, and audits module scope. It reports per-requirement status — verified, failing, or no evidence — along with the test counts and file attribution for each passing requirement. Run it after an agent session to see what was covered and what still needs work.
+
+## Arguments
+
+`sodide verify` takes no positional arguments. Use `--spec` to target a single spec.
+
+## Options
+
+| Flag | Description | Default |
+|---|---|---|
+| `--spec <ID>` | Only verify the spec with the given ID. | All specs |
+| `--json` | Emit compact JSON instead of the human-readable summary. Useful when piping output to an agent or script. | Off |
+
+## Examples
+
+**Verify all specs:**
+
+```sh
+sodide verify
+```
+
+**Verify a single spec:**
+
+```sh
+sodide verify --spec WORKSHOP
+```
+
+```
+WORKSHOP (Workshop Management)
+------------------------------------------------------------
+  ✓ Create workshop with title and description
+      1 e2e, 1 integration, 3 unit | handlers/create.ts, routes.ts +68/-0
+  ✗ Admins can delete any workshop
+      0 e2e, 0 integration, 1 unit | handlers/delete.ts +8/-0
+      unit ✗ test_admin_delete → AssertionError: expected 200 but got 403
+  · Public workshops are readable by anyone
+      (no evidence)
+  Patterns: ✓ !npx tsc --noEmit | ✓ !npx madge --circular
+  Scope: 0 violations
+  7 verified, 1 failing, 2 no evidence.
+```
+
+**Machine-readable output for agent consumption:**
+
+```sh
+sodide verify --spec WORKSHOP --json
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|---|---|
+| `0` | All requirements verified and all patterns passed. |
+| `1` | One or more requirements are failing or have no evidence. |
+| `2` | An error occurred (spec not found, command parse failure, I/O error). |
+
+## See Also
+
+- [Spec Format](/sodide-docsite/guides/spec-format/) — how `.spec.md` files are structured
+- [How It Works](/sodide-docsite/concepts/how-it-works/) — the full verification loop
+- [sodide implement](/sodide-docsite/cli/implement/) — launch an agent to satisfy failing requirements
+- [sodide audit](/sodide-docsite/cli/audit/) — read-only evidence audit without writing code

@@ -1,6 +1,60 @@
 ---
 title: "sodide mcp-serve"
-description: "CLI reference for sodide mcp-serve"
+description: Start an MCP server for supervisor orchestration of parallel agents.
 ---
 
-Coming soon.
+## Synopsis
+
+```
+sodide mcp-serve --spec <SPEC> [OPTIONS]
+```
+
+## Description
+
+`sodide mcp-serve` starts a local MCP (Model Context Protocol) server that a supervisor agent can use to dispatch and coordinate multiple parallel worker agents against a spec. The server manages agent concurrency, distributes requirements across workers, and aggregates evidence as sessions complete. Use it when a spec has many outstanding requirements and you want to parallelize implementation across multiple agent sessions.
+
+## Arguments
+
+`sodide mcp-serve` takes no positional arguments. Use `--spec` to specify the target spec.
+
+## Options
+
+| Flag | Description | Default |
+|---|---|---|
+| `--spec <SPEC>` | The spec ID to serve. Required. | — |
+| `--max-agents <N>` | Maximum number of worker agents to run concurrently. | CPU count |
+| `--port <PORT>` | HTTP port for the MCP server to listen on. | OS-assigned |
+
+## Examples
+
+**Start an MCP server for a spec with default concurrency:**
+
+```sh
+sodide mcp-serve --spec WORKSHOP
+```
+
+**Limit to 4 concurrent worker agents:**
+
+```sh
+sodide mcp-serve --spec WORKSHOP --max-agents 4
+```
+
+**Run on a fixed port (useful for connecting a supervisor configured with a static URL):**
+
+```sh
+sodide mcp-serve --spec WORKSHOP --port 8765
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|---|---|
+| `0` | Server shut down cleanly after all work completed. |
+| `1` | Server stopped with one or more requirements still failing or unevidenced. |
+| `2` | An error occurred (spec not found, port conflict, I/O error). |
+
+## See Also
+
+- [sodide implement](/sodide-docsite/cli/implement/) — single-agent implementation without MCP orchestration
+- [sodide verify](/sodide-docsite/cli/verify/) — verify results after agent sessions complete
+- [Agent Integration](/sodide-docsite/guides/agent-integration/) — connecting supervisors and workers to sodide

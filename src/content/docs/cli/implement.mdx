@@ -1,6 +1,71 @@
 ---
 title: "sodide implement"
-description: "CLI reference for sodide implement"
+description: Launch an agent to implement requirements from a spec.
 ---
 
-Coming soon.
+## Synopsis
+
+```
+sodide implement <SPEC> [REQUIREMENT] [OPTIONS]
+```
+
+## Description
+
+`sodide implement` assembles a structured context prompt from the named spec — requirements, module scope, patterns, and current verification state — and launches an agent session to implement them. The agent works within the declared module scope and reports evidence for each requirement it satisfies. Use this command when you have unverified or failing requirements and want an agent to address them.
+
+## Arguments
+
+| Argument | Description |
+|---|---|
+| `<SPEC>` | The spec ID to implement. Required. Matches the filename without the `.spec.md` suffix (e.g., `WORKSHOP`, `auth/LOGIN`). |
+| `[REQUIREMENT]` | Optional. Target a single requirement by line number or by a substring of its text. When omitted, the agent receives all unverified requirements. |
+
+## Options
+
+| Flag | Description | Default |
+|---|---|---|
+| `--all` | Implement all unverified and failing requirements sequentially, one agent session per requirement. | Off |
+| `--no-supervisor` | Launch the worker agent directly, bypassing the supervisor orchestration layer. | Off |
+| `--dry-run` | Print the assembled agent prompt to stdout without launching any agent. Useful for inspecting what context the agent would receive. | Off |
+
+## Examples
+
+**Implement all outstanding requirements for a spec:**
+
+```sh
+sodide implement WORKSHOP --all
+```
+
+**Implement a specific requirement by text substring:**
+
+```sh
+sodide implement WORKSHOP "Admins can delete"
+```
+
+**Implement a specific requirement by line number:**
+
+```sh
+sodide implement WORKSHOP 14
+```
+
+**Inspect the prompt without launching an agent:**
+
+```sh
+sodide implement WORKSHOP --dry-run
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|---|---|
+| `0` | Agent session completed. |
+| `1` | Agent session completed with one or more requirements still failing or unevidenced. |
+| `2` | An error occurred (spec not found, agent launch failure, I/O error). |
+
+## See Also
+
+- [sodide verify](/sodide-docsite/cli/verify/) — check requirement status after an agent session
+- [sodide audit](/sodide-docsite/cli/audit/) — read-only audit without writing code
+- [sodide context](/sodide-docsite/cli/context/) — generate the agent prompt for manual use
+- [sodide mcp-serve](/sodide-docsite/cli/mcp-serve/) — run parallel agents via an MCP server
+- [How It Works](/sodide-docsite/concepts/how-it-works/) — the full agent workflow

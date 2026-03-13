@@ -1,6 +1,70 @@
 ---
-title: "shell-commands"
-description: "Example: shell-commands"
+title: Shell Commands
+description: Shell-only verification using ! links — no test framework required.
 ---
 
-Coming soon.
+import { Aside } from '@astrojs/starlight/components';
+
+All requirements are verified by shell commands rather than test functions. No test framework is needed.
+
+## The Spec
+
+```markdown
+---
+title: Build Health Checks
+---
+# Build Health
+Shell-based verification — no test framework required.
+## File Structure
+- [ ] Source file exists [[ !test -f src/app.py ]]
+- [ ] Source file has valid Python syntax [[ !python3 -c "import py_compile; py_compile.compile('src/app.py', doraise=True)" ]]
+## Security
+- [ ] No hardcoded secrets in source [[ !sh -c "! grep -q 'SECRET_KEY' src/app.py" ]]
+## Code Quality
+- [ ] Main function is defined [[ !grep -q 'def main' src/app.py ]]
+- [ ] No TODO comments left in source [[ !sh -c "! grep -q 'TODO' src/app.py" ]]
+```
+
+## Run It
+
+```sh
+sodide verify examples/03-shell-commands
+```
+
+Expected output:
+
+```
+BUILD_HEALTH (Build Health Checks)
+------------------------------------------------------------
+  ✓ Source file exists
+      shell ✓ test -f src/app.py
+  ✓ Source file has valid Python syntax
+      shell ✓ python3 -c "import py_compile; py_compile.compile('src/app.py', doraise=True)"
+  ✓ No hardcoded secrets in source
+      shell ✓ sh -c "! grep -q 'SECRET_KEY' src/app.py"
+  ✓ Main function is defined
+      shell ✓ grep -q 'def main' src/app.py
+  ✗ No TODO comments left in source
+      shell ✗ sh -c "! grep -q 'TODO' src/app.py" → exit code 1
+  4 verified, 1 failing, 0 no evidence.
+```
+
+## What to Notice
+
+<Aside type="note" title="The ! prefix runs a shell command">
+Any verification link that starts with `!` is treated as a shell command rather than a test reference. sodide runs the command in the project root and marks the requirement `✓` if the command exits with code `0`, `✗` otherwise. The `!` is stripped before execution — `[[ !test -f src/app.py ]]` runs `test -f src/app.py`.
+</Aside>
+
+<Aside type="note" title="No test framework needed">
+Shell command links are useful for projects that don't use a traditional test framework, or for checks that sit outside the test suite: confirming a file exists, validating syntax, asserting structural properties of source code, or running a linter. Any check expressible as a shell exit code can be a verification link.
+</Aside>
+
+<Aside type="note" title="Good fits: build health, security, lint">
+Shell links are well-suited to three categories of checks that are awkward to put in a unit test:
+
+- **Build health** — file existence, syntax validity, compilation
+- **Security** — absence of secrets, banned patterns, dependency audits
+- **Code quality** — grep-based structural assertions, TODO cleanup, import hygiene
+
+Because these checks run on every `sodide verify`, they become lightweight CI gates without any pipeline configuration.
+</Aside>

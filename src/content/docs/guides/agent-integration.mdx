@@ -3,4 +3,162 @@ title: Agent Integration
 description: Working with coding agents
 ---
 
-Coming soon.
+Sodide sits on top of your existing workflow. It does not replace your agent — it gives the agent a precise picture of what to build, constrains where it can work, and verifies the result. Any agent that can read files and run commands can participate.
+
+---
+
+## How sodide works with agents
+
+The division of responsibility is simple:
+
+| Actor | Does |
+|-------|------|
+| You | Write the spec: requirements, module scope, architectural patterns |
+| Sodide | Generates structured context, tracks git changes, runs verification |
+| Agent | Reads the context, implements code and tests, reports evidence |
+
+The agent needs no special integration with sodide. It receives a context block, does its work, and returns. Sodide handles the rest.
+
+---
+
+## `sodide context`
+
+Generate a structured context block for any spec:
+
+```bash
+sodide context WORKSHOP
+```
+
+Output:
+
+```
+## Spec: Workshop Management (WORKSHOP)
+
+### Module Scope
+You should only modify files within these directories:
+- src/workshops/
+- src/db/workshops.ts
+
+### Architectural Patterns
+- CRUD handlers in src/workshops/handlers/
+- DB queries in src/db/workshops.ts (no inline SQL in handlers)
+
+### Requirements
+1. NO EVIDENCE - Create workshop with title and description
+2. NO EVIDENCE - Read workshop by ID
+3. VERIFIED - Update workshop metadata (1 integration, 2 unit)
+4. FAILING - Delete workshop (soft delete)
+```
+
+Each requirement shows its current verification state: `NO EVIDENCE`, `VERIFIED`, or `FAILING`. The agent sees exactly what is already done and what still needs work.
+
+Pipe this to any agent:
+
+```bash
+sodide context WORKSHOP | your-agent
+```
+
+This is the escape hatch for agents sodide does not natively integrate with. As long as the agent reads stdin and can run shell commands, `sodide context` gets you there.
+
+---
+
+## `sodide implement`
+
+For agents sodide integrates with directly, `sodide implement` launches a full session with tracking:
+
+```bash
+sodide implement WORKSHOP                    # implement next unverified requirement
+sodide implement WORKSHOP --all              # implement all unverified sequentially
+sodide implement WORKSHOP "Delete workshop"  # implement specific requirement
+sodide implement WORKSHOP --dry-run          # preview the agent prompt without launching
+sodide implement WORKSHOP --no-supervisor    # skip supervisor, launch worker directly
+```
+
+When the agent finishes, sodide automatically runs `sodide verify` against the spec and prints the updated evidence summary. You do not need to run verify separately.
+
+---
+
+## Supported agents
+
+| Agent | Integration |
+|-------|-------------|
+| Claude Code | Primary integration — uses Claude Agent SDK, full event streaming |
+| Codex | Pipe context: `sodide context SPEC \| codex` |
+| Aider | Pipe context: `sodide context SPEC \| aider --message -` |
+| Any custom agent | Read the context, implement, report evidence |
+
+Claude Code is the primary integration. `sodide implement` defaults to launching a Claude Code worker. For all other agents, `sodide context` gives you the same structured input that workers receive.
+
+---
+
+## The supervisor
+
+For complex specs, sodide runs a supervisor agent alongside the worker. The supervisor does not write code — it coordinates:
+
+- Validates evidence quality: test count, pyramid balance (e2e / integration / unit), scope
+- Enforces architectural patterns before evidence is accepted
+- Detects when a worker has gone out of scope and signals a correction
+- Resolves conflicts when parallel workers touch shared files
+
+By default, `sodide implement` uses the supervisor. For simple specs or quick iteration, skip it:
+
+```bash
+sodide implement WORKSHOP --no-supervisor
+```
+
+Without the supervisor, the worker launches directly and evidence is accepted at face value. Sodide still runs verification — the supervisor just does not pre-screen the results.
+
+---
+
+## Parallel execution
+
+Run multiple agents against independent specs at the same time:
+
+```bash
+sodide implement WORKSHOP &
+sodide implement PAYMENTS &
+sodide implement AUTH &
+```
+
+Each session runs in an isolated git worktree. Workers cannot interfere with each other because they never share a working tree. When sessions finish, the supervisor (if active) determines merge order based on inter-spec dependencies declared in your spec files.
+
+For managed multi-agent orchestration, use `sodide mcp-serve`:
+
+```bash
+sodide mcp-serve --spec WORKSHOP --max-agents 4
+```
+
+This starts an MCP server that coordinates up to four workers against a single spec, assigning requirements to workers based on what is unverified and what has no in-progress work.
+
+---
+
+## MCP integration
+
+`sodide mcp-serve` exposes sodide's internals as MCP tools that agents can call directly:
+
+```bash
+sodide mcp-serve --spec WORKSHOP --max-agents 4
+```
+
+Agents connected to the server can:
+
+- Query the current verification state of any requirement
+- Report evidence for review before `sodide verify` runs
+- Ask the supervisor whether a proposed file change is in scope
+- Signal that they are blocked and need a different requirement
+
+This is the most capable integration mode. Use it when you are orchestrating multiple agents against a single spec and want real-time coordination rather than sequential handoffs.
+
+---
+
+## Choosing an approach
+
+| Situation | Command |
+|-----------|---------|
+| Single requirement, quick iteration | `sodide implement SPEC "requirement text" --no-supervisor` |
+| Full spec, sequential | `sodide implement SPEC --all` |
+| Full spec, parallel workers | `sodide mcp-serve --spec SPEC --max-agents N` |
+| Third-party agent | `sodide context SPEC \| your-agent` |
+| Inspect the prompt first | `sodide implement SPEC --dry-run` |
+
+All paths end at the same place: `sodide verify` runs, and the evidence summary tells you what passed, what failed, and what still has no coverage.

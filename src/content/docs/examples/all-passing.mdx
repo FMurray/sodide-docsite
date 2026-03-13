@@ -1,6 +1,65 @@
 ---
-title: "all-passing"
-description: "Example: all-passing"
+title: All Passing
+description: Happy path example — all requirements verified with linked tests.
 ---
 
-Coming soon.
+import { Aside } from '@astrojs/starlight/components';
+
+All requirements are linked to passing tests. This is the target state for a fully-implemented spec.
+
+## The Spec
+
+```markdown
+---
+title: Calculator
+modules:
+  - src/
+---
+# Calculator
+Basic arithmetic operations with error handling.
+## Requirements
+- [ ] Addition returns the sum of two numbers [[ tests/test_calculator.py:test_add ]]
+- [ ] Subtraction returns the difference of two numbers [[ tests/test_calculator.py:test_subtract ]]
+- [ ] Multiplication returns the product of two numbers [[ tests/test_calculator.py:test_multiply ]]
+- [ ] Division returns the quotient of two numbers [[ tests/test_calculator.py:test_divide ]]
+- [ ] Division by zero raises ValueError [[ tests/test_calculator.py:test_divide_by_zero ]]
+```
+
+## Run It
+
+```sh
+sodide verify examples/01-all-passing
+```
+
+Expected output:
+
+```
+CALCULATOR (Calculator)
+------------------------------------------------------------
+  ✓ Addition returns the sum of two numbers
+      0 e2e, 0 integration, 1 unit | src/calculator.py +12/-0
+  ✓ Subtraction returns the difference of two numbers
+      0 e2e, 0 integration, 1 unit | src/calculator.py +5/-0
+  ✓ Multiplication returns the product of two numbers
+      0 e2e, 0 integration, 1 unit | src/calculator.py +5/-0
+  ✓ Division returns the quotient of two numbers
+      0 e2e, 0 integration, 1 unit | src/calculator.py +6/-0
+  ✓ Division by zero raises ValueError
+      0 e2e, 0 integration, 1 unit | src/calculator.py +4/-0
+  Scope: 0 violations
+  5 verified, 0 failing, 0 no evidence.
+```
+
+## What to Notice
+
+<Aside type="note" title="Verification links: [[ file:test ]]">
+The `[[ tests/test_calculator.py:test_add ]]` syntax at the end of each requirement line links that requirement to a specific test. During `sodide verify`, sodide runs each linked test and marks the requirement `✓` only if all linked tests pass.
+</Aside>
+
+<Aside type="note" title="Module scope">
+The `modules: [src/]` frontmatter field declares that all implementation code for this spec lives under `src/`. sodide traces git changes and flags any modifications outside that boundary as scope violations. With 0 violations, everything stayed in scope.
+</Aside>
+
+<Aside type="note" title="All-green output">
+When every requirement has at least one passing linked test, the summary line reads `N verified, 0 failing, 0 no evidence`. This is the target state — the spec is fully satisfied and every claim is backed by evidence.
+</Aside>

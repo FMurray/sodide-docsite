@@ -1,6 +1,63 @@
 ---
-title: "multi-link"
-description: "Example: multi-link"
+title: Multi-Link
+description: Comma-separated verification links and Class::method node ID syntax.
 ---
 
-Coming soon.
+import { Aside } from '@astrojs/starlight/components';
+
+Each requirement is backed by two tests: a standalone function and a class-scoped method. Both must pass for the requirement to be marked verified.
+
+## The Spec
+
+```markdown
+---
+title: User Service
+modules:
+  - src/
+---
+# User Service
+CRUD operations for user management.
+## Requirements
+- [ ] Create user stores name and email [[ tests/test_user_service.py:test_create_user, tests/test_user_service.py:TestUserService::test_create_stores_fields ]]
+- [ ] Get user retrieves by ID [[ tests/test_user_service.py:test_get_user, tests/test_user_service.py:TestUserService::test_get_returns_user ]]
+- [ ] Update user changes stored fields [[ tests/test_user_service.py:test_update_user, tests/test_user_service.py:TestUserService::test_update_changes_email ]]
+- [ ] Delete user removes from store [[ tests/test_user_service.py:test_delete_user, tests/test_user_service.py:TestUserService::test_delete_is_permanent ]]
+```
+
+## Run It
+
+```sh
+sodide verify examples/05-multi-link
+```
+
+Expected output:
+
+```
+USER_SERVICE (User Service)
+------------------------------------------------------------
+  ✓ Create user stores name and email
+      0 e2e, 0 integration, 2 unit | src/user_service.py +28/-0
+  ✓ Get user retrieves by ID
+      0 e2e, 0 integration, 2 unit | src/user_service.py +14/-0
+  ✓ Update user changes stored fields
+      0 e2e, 0 integration, 2 unit | src/user_service.py +16/-0
+  ✗ Delete user removes from store
+      0 e2e, 0 integration, 2 unit | src/user_service.py +12/-0
+      unit ✗ TestUserService::test_delete_is_permanent → AssertionError: record still found after delete
+  Scope: 0 violations
+  3 verified, 1 failing, 0 no evidence.
+```
+
+## What to Notice
+
+<Aside type="note" title="Comma-separated links for multiple test references">
+Multiple verifiers are listed inside a single `[[ ]]` pair, separated by commas. sodide runs all of them and marks the requirement `✓` only when every linked test passes. If any one test fails, the requirement is `✗`. This is useful when a feature has both a happy-path test and a more thorough class-based test suite that should both be green before the requirement is considered done.
+</Aside>
+
+<Aside type="note" title="Class::method node ID syntax">
+`TestUserService::test_create_stores_fields` refers to the `test_create_stores_fields` method inside the `TestUserService` class. The `Class::method` format is the node ID syntax used by pytest (and understood by sodide). Use it to pin a specific test method within a test class rather than running the entire class.
+</Aside>
+
+<Aside type="note" title="CRUD as a coverage pattern">
+Pairing a standalone function test with a class-scoped method for each CRUD operation gives two independent angles on the same behavior: one that tests the function directly, and one that tests it through a fixture-driven test class. If both pass, the implementation is exercised from multiple call sites — a useful baseline for service-layer code.
+</Aside>

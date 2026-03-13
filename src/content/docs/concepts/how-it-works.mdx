@@ -1,6 +1,155 @@
 ---
 title: How It Works
-description: The sodide verification loop
+description: The sodide verification loop explained
 ---
 
-Coming soon.
+Sodide is spec-driven development for AI agents. The central idea is simple: the spec is the human's interface to the agent's work. Humans write requirements and architectural boundaries. Agents implement and report evidence. Sodide mechanically traces everything back to the spec.
+
+## The three actors
+
+Every sodide workflow involves three actors with clearly separated responsibilities:
+
+| Actor | Controls | Role |
+|-------|----------|------|
+| Human | Requirements, module scope, patterns | Defines "what" |
+| Agent | Code, tests, verification commands | Defines "how" |
+| Sodide | Execution, git tracing, scope enforcement | Checks everything |
+
+The separation matters. No single actor can produce a false ✓. The human cannot mark something done without evidence. The agent cannot claim compliance without passing tests. Sodide cannot invent coverage that does not exist.
+
+---
+
+## Phase 1: Write the spec
+
+*About 2 minutes.*
+
+A spec is a markdown file with a small YAML frontmatter block. Here is the Friends Feature spec:
+
+```markdown
+---
+title: Friends Feature
+modules: [src/users/, src/components/friends/]
+patterns:
+  - all friend mutations go through src/users/friends.py
+  - "!grep -q 'class FriendRequest' src/users/models.py"
+---
+# Friends Feature
+## Core
+- [ ] User can add friends
+- [ ] Friends list shows online status
+- [ ] Blocking a user removes them from friends
+## Privacy
+- [ ] Friend requests require mutual acceptance
+- [ ] Blocked users cannot see your profile
+```
+
+Notice what is absent: no test file names, no function signatures, no implementation details. The human's job is to express intent clearly. Sodide and the agent handle everything else.
+
+The `modules` field defines the scope — files the agent is allowed to touch. The `patterns` field defines invariants that must hold after every session. The `!` prefix on a pattern means the command should exit non-zero to pass (i.e., the pattern asserts something is *absent*).
+
+---
+
+## Phase 2: Launch the agent
+
+```
+sodide implement FRIENDS
+```
+
+Sodide reads the spec, assembles structured context — requirements, in-scope modules, patterns, current git state — and launches an agent session. Every git operation made during the session is tracked against the spec.
+
+The agent receives a precise picture of what it is responsible for and where it is allowed to work. Nothing more.
+
+---
+
+## Phase 3: Agent works and reports evidence
+
+The agent implements within module scope. When it believes a requirement is satisfied, it reports structured evidence: the requirement text, and a list of verification commands tiered by scope.
+
+```json
+{
+  "spec": "FRIENDS",
+  "evidence": [
+    {
+      "requirement": "User can add friends",
+      "verification": [
+        {"tier": "e2e", "command": "npx playwright test e2e/friends.e2e.ts -g 'add friend'"},
+        {"tier": "integration", "command": "pytest tests/integration/test_friends.py::test_add_friend_db"},
+        {"tier": "unit", "command": "pytest tests/unit/test_friends.py::test_friend_request_model"}
+      ]
+    }
+  ]
+}
+```
+
+The agent does not mark requirements done. It submits commands for sodide to run. The distinction matters: the agent cannot self-certify.
+
+---
+
+## Phase 4: Review evidence
+
+```
+sodide verify --spec FRIENDS
+```
+
+Sodide runs every verification command, checks patterns, audits scope, and prints a summary:
+
+```
+FRIENDS (Friends Feature)
+------------------------------------------------------------
+  ✓ User can add friends
+      1 e2e, 3 integration, 5 unit | friends.py, router.py, FriendRequest.tsx +49/-12
+
+  ✗ Friends list shows online status
+      0 e2e, 2 integration, 1 unit | StatusBadge.tsx +22/-0
+      integration ✗ test_friends_list_online_status
+        → AssertionError: expected 'online' but got 'offline'
+
+  · Blocking a user removes them from friends
+      (no evidence yet)
+
+  ✓ Friend requests require mutual acceptance
+      0 e2e, 2 integration, 3 unit | friends.py +18/-2
+
+  · Blocked users cannot see your profile
+      (no evidence yet)
+
+  Patterns:
+    ✓ all friend mutations go through src/users/friends.py
+    ✓ !grep -q 'class FriendRequest' src/users/models.py
+
+  Scope: 0 violations
+  3 verified, 1 failing, 2 no evidence.
+```
+
+The human reads this in seconds without opening a single source file:
+
+- **"User can add friends"** — 9 tests across 3 tiers, 3 files touched, a reasonable blast radius. Done.
+- **"Friends list shows online status"** — one failing integration test. The status value is wrong. Needs another pass.
+- **"Blocking a user"** and **"Blocked users cannot see your profile"** — no evidence yet. The agent ran out of context or time before reaching these. Still open.
+- Patterns hold: all mutations route through `friends.py`, and `FriendRequest` was not added to `models.py` as intended.
+- Scope is clean: the agent stayed within `src/users/` and `src/components/friends/`.
+
+This is the efficient verifier interface. The summary tells the human what was built, how thoroughly it was tested, what the blast radius looks like, and what still needs work — without asking them to read code.
+
+---
+
+## Phase 5: The harness improves
+
+The human reviews a different feature and notices the agent wrote raw SQL directly instead of going through the query layer. They add a pattern to the affected spec:
+
+```yaml
+patterns:
+  - "!scripts/no-raw-sql.sh src/users/"
+```
+
+That mistake can never happen again in that module. Every future agent session against the spec runs the check. Patterns accumulate over time, encoding the team's architectural decisions and hard-won lessons directly into the verification harness. The harness gets more precise with each session, not less.
+
+---
+
+## The key insight
+
+Traditional code review asks the human to read implementation and infer correctness. Sodide inverts that. The human writes the spec up front — expressing intent once, clearly — and then reviews *evidence* rather than code.
+
+The evidence summary answers the questions a reviewer actually cares about: Is this requirement covered? At what depth? What changed? Does anything architectural look wrong? What still needs work?
+
+The spec is the contract. Sodide is the enforcement layer. The agent is the implementer. Each role is distinct, and the combination means a ✓ in sodide's output means something.

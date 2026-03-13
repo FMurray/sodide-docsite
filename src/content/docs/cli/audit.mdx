@@ -1,6 +1,69 @@
 ---
 title: "sodide audit"
-description: "CLI reference for sodide audit"
+description: Read-only audit of existing code for evidence of spec requirements.
 ---
 
-Coming soon.
+## Synopsis
+
+```
+sodide audit <SPEC> [REQUIREMENT] [OPTIONS]
+```
+
+## Description
+
+`sodide audit` launches an agent to search existing code for evidence that spec requirements are already satisfied, without writing any new code. It is the read-only counterpart to `sodide implement`. Use it when you have a spec for a codebase that predates sodide, or when you want to establish a baseline before running an implement session.
+
+## Arguments
+
+| Argument | Description |
+|---|---|
+| `<SPEC>` | The spec ID to audit. Required. Matches the filename without the `.spec.md` suffix (e.g., `WORKSHOP`, `auth/LOGIN`). |
+| `[REQUIREMENT]` | Optional. Target a single requirement by line number or by a substring of its text. When omitted, all unevidenced requirements are audited. |
+
+## Options
+
+| Flag | Description | Default |
+|---|---|---|
+| `--all` | Audit all unevidenced requirements sequentially, one agent session per requirement. | Off |
+| `--force` | Include requirements that already have evidence. Useful for re-auditing after a refactor. | Off |
+| `--dry-run` | Print the assembled agent prompt to stdout without launching any agent. | Off |
+
+## Examples
+
+**Audit all unevidenced requirements for a spec:**
+
+```sh
+sodide audit WORKSHOP --all
+```
+
+**Audit a single requirement by text substring:**
+
+```sh
+sodide audit WORKSHOP "Public workshops are readable"
+```
+
+**Force re-audit of all requirements, including already-evidenced ones:**
+
+```sh
+sodide audit WORKSHOP --all --force
+```
+
+**Inspect the audit prompt without launching an agent:**
+
+```sh
+sodide audit WORKSHOP --dry-run
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|---|---|
+| `0` | Audit session completed. |
+| `1` | Audit session completed but one or more requirements remain unevidenced. |
+| `2` | An error occurred (spec not found, agent launch failure, I/O error). |
+
+## See Also
+
+- [sodide verify](/sodide-docsite/cli/verify/) — run verification commands after an audit
+- [sodide implement](/sodide-docsite/cli/implement/) — implement requirements rather than just audit them
+- [sodide context](/sodide-docsite/cli/context/) — generate the agent prompt for manual use

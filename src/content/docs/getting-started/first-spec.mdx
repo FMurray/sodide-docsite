@@ -1,6 +1,157 @@
 ---
 title: Your First Spec
-description: Write your first spec and verify it
+description: Write your first spec and run the verification loop
 ---
 
-Coming soon.
+import { Steps } from '@astrojs/starlight/components';
+
+This tutorial walks you through the full sodide loop: write a spec, run verify, launch an agent, review evidence, and tighten the harness with patterns.
+
+<Steps>
+
+1. **Create a spec file**
+
+   Create `specs/SHOPPING_CART.spec.md` at the root of your project:
+
+   ```markdown
+   # Shopping Cart
+
+   - [ ] Add item to cart
+   - [ ] Remove item from cart
+   - [ ] Cart persists across sessions
+   ```
+
+   The filename (without `.spec.md`) becomes the spec ID sodide uses on the command line. Requirements are standard GFM task list items — no special syntax required.
+
+2. **Run verify**
+
+   ```sh
+   sodide verify
+   ```
+
+   Output:
+
+   ```
+   SHOPPING_CART (Shopping Cart)
+   ------------------------------------------------------------
+     · Add item to cart
+     · Remove item from cart
+     · Cart persists across sessions
+
+     0 verified, 0 failing, 3 no evidence.
+   ```
+
+   The `·` symbol means sodide found the requirement but has no evidence linking any tests or code changes to it yet. Nothing is failing — there is simply nothing to evaluate.
+
+3. **Add module scope**
+
+   Open `specs/SHOPPING_CART.spec.md` and add YAML frontmatter before the heading:
+
+   ```markdown
+   ---
+   modules:
+     - src/cart/
+   ---
+
+   # Shopping Cart
+
+   - [ ] Add item to cart
+   - [ ] Remove item from cart
+   - [ ] Cart persists across sessions
+   ```
+
+   The `modules` field tells sodide — and any agent it launches — which directories are in scope for this spec. Changes outside these paths are flagged as scope violations. This keeps implementation contained and makes evidence attribution unambiguous.
+
+4. **Launch an agent**
+
+   ```sh
+   sodide implement SHOPPING_CART
+   ```
+
+   sodide assembles a structured context block and passes it to the agent as its initial prompt. The agent receives a scoped session: it knows exactly what to build, where code changes are allowed, and what the current verification state is.
+
+   The context looks like this:
+
+   ```
+   ## Spec: Shopping Cart (SHOPPING_CART)
+
+   ### Module Scope
+   You should only modify files within these directories:
+   - src/cart/
+
+   ### Requirements
+   1. NO EVIDENCE - Add item to cart
+   2. NO EVIDENCE - Remove item from cart
+   3. NO EVIDENCE - Cart persists across sessions
+   ```
+
+   The agent works within `src/cart/`, writes tests, and produces the implementation. When it finishes, control returns to you.
+
+5. **Review evidence**
+
+   Run verify scoped to this spec:
+
+   ```sh
+   sodide verify --spec SHOPPING_CART
+   ```
+
+   Output after the agent has worked:
+
+   ```
+   SHOPPING_CART (Shopping Cart)
+   ------------------------------------------------------------
+     ✓ Add item to cart
+         0 e2e, 1 integration, 2 unit | cart.py +45/-0
+
+     ✓ Remove item from cart
+         0 e2e, 0 integration, 2 unit | cart.py +20/-0
+
+     · Cart persists across sessions
+         (no evidence yet)
+
+     Scope: 0 violations
+     2 verified, 0 failing, 1 no evidence.
+   ```
+
+   The three symbols at a glance:
+
+   | Symbol | Meaning |
+   |--------|---------|
+   | `✓` | Verified — sodide found tests linked to this requirement and they pass |
+   | `✗` | Failing — evidence exists but one or more linked tests are red |
+   | `·` | No evidence — requirement exists but nothing is linked to it yet |
+
+   The evidence line beneath each verified requirement shows the test pyramid breakdown (`e2e / integration / unit`), the files changed, and their line deltas. "Cart persists across sessions" has no evidence, so the agent still needs to address it — either in a follow-up session or by hand.
+
+6. **Add a pattern**
+
+   After reviewing, you can encode an architectural guardrail directly in the spec. Open `specs/SHOPPING_CART.spec.md` and add a `patterns` key to the frontmatter:
+
+   ```markdown
+   ---
+   modules:
+     - src/cart/
+   patterns:
+     - "!python -c \"import ast; ast.parse(open('src/cart/cart.py').read())\""
+   ---
+
+   # Shopping Cart
+
+   - [ ] Add item to cart
+   - [ ] Remove item from cart
+   - [ ] Cart persists across sessions
+   ```
+
+   Patterns starting with `!` are shell commands. sodide runs them during every `verify` pass. If the command exits non-zero, the pattern is flagged as a violation. This one parses `cart.py` with Python's AST module — a fast, zero-dependency syntax check that catches malformed code before any tests run.
+
+   Patterns are human-authored guardrails. They accumulate over time as you discover failure modes: style constraints, import restrictions, schema invariants, anything expressible as a shell exit code. Each cycle through the loop is an opportunity to add one.
+
+</Steps>
+
+## The loop
+
+```
+Specify → Implement → Verify → Improve patterns → repeat
+```
+
+Each iteration makes the harness stronger. Requirements that start as `·` become `✓`. Patterns that start as notes in a README become executable checks. Over time the spec file becomes a living contract: both the definition of done and the mechanism that enforces it.

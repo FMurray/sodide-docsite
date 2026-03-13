@@ -3,4 +3,79 @@ title: Installation
 description: Get started with sodide
 ---
 
-Coming soon.
+import { Aside } from '@astrojs/starlight/components';
+
+sodide is a spec-driven development verification framework. You write requirements in plain markdown `.spec.md` files, run agents that implement them, and verify the results automatically — with evidence linked back to each requirement inline. There is no SaaS, no account, and no cloud sync: your specs live in your repo alongside your code.
+
+## Install
+
+Install from [crates.io](https://crates.io/crates/sodide) with Cargo:
+
+```sh
+cargo install sodide
+```
+
+Or build from source:
+
+```sh
+git clone https://github.com/FMurray/sodide
+cd sodide
+cargo build --release
+# binary is at ./target/release/sodide
+```
+
+<Aside type="tip">
+  Rust 1.75 or later is required. Run `rustup update stable` if you need to upgrade.
+</Aside>
+
+## Try an example
+
+The repository ships with example specs. Run `sodide verify` against the all-passing Calculator example to confirm everything is working:
+
+```sh
+sodide verify examples/01-all-passing
+```
+
+You should see output like this:
+
+```
+CALCULATOR (Calculator)
+------------------------------------------------------------
+  ✓ Addition returns the sum of two numbers
+      1 unit | test_calculator.py
+  ✓ Subtraction returns the difference of two numbers
+      1 unit | test_calculator.py
+  ✓ Multiplication returns the product of two numbers
+      1 unit | test_calculator.py
+  ✓ Division returns the quotient of two numbers
+      1 unit | test_calculator.py
+  ✓ Division by zero raises ValueError
+      1 unit | test_calculator.py
+
+  5 verified, 0 failing, 0 no evidence.
+```
+
+Each checkmark means sodide found evidence — a test, a lint result, or a shell assertion — that satisfies the requirement. The filename next to each entry tells you exactly which file provided that evidence.
+
+## Launch the UI
+
+sodide ships with a native desktop app for browsing specs visually:
+
+```sh
+sodide ui
+```
+
+The UI lets you:
+
+- Browse all specs in the current repo
+- See per-requirement status (verified, failing, no evidence)
+- Navigate cross-references between specs
+- Launch an agent to implement a selected requirement
+
+<Aside>
+  The UI reads the same `.spec.md` files and evidence cache that the CLI uses — there is no separate data store.
+</Aside>
+
+## Next steps
+
+Follow the [Your First Spec](/sodide-docsite/getting-started/first-spec/) tutorial to write and verify your own spec from scratch.

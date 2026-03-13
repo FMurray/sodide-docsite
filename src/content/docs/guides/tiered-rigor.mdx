@@ -1,6 +1,113 @@
 ---
 title: Tiered Rigor
-description: Choose your verification level
+description: Choose your verification level per spec
 ---
 
-Coming soon.
+Not every feature needs the same level of scrutiny. Sodide scales from lightweight scope tracking to full evidence-gated verification — and you choose per spec. Critical auth code gets structural patterns and test evidence. A utility module gets basic scope checking. The harness improves over time as you discover where agents make mistakes.
+
+Start light. Add rigor where it matters.
+
+---
+
+## Light — Scope Only
+
+The minimum useful spec: a `modules:` field and a list of requirements. Sodide tracks which files were touched and whether they fall within the declared boundary. Even without tests, the agent cannot escape its scope unnoticed.
+
+```markdown
+---
+modules: [src/utils/]
+---
+# String Utilities
+- [ ] Capitalize first letter
+- [ ] Trim whitespace
+```
+
+When you run `sodide verify`, the output shows file changes and scope compliance. No test counts, no pattern results — just a clear record of what moved and whether it stayed in bounds.
+
+This is the right level for internal utilities, scripts, and non-critical paths where correctness is easy to eyeball and drift is the main risk.
+
+---
+
+## Medium — Add Architectural Constraints
+
+Add a `patterns:` list to enforce architectural rules. Descriptive patterns are passed to the agent as instructions before it starts work. Executable patterns (prefixed with `!`) are run as shell commands during verification — the spec fails if any of them exit non-zero.
+
+```markdown
+---
+modules: [src/cart/]
+patterns:
+  - all cart mutations go through src/cart/service.py
+  - "!grep -q 'class CartItem' src/cart/models.py"
+---
+# Shopping Cart
+- [ ] Add item to cart
+- [ ] Remove item from cart
+```
+
+Here, the agent is told to route mutations through the service layer (descriptive), and verification mechanically confirms that `CartItem` exists in the expected location (executable). You get scope enforcement plus structural guarantees without needing a full test suite.
+
+Medium rigor suits most features: API endpoints, data models, business logic where the architecture matters but the risk profile is ordinary.
+
+---
+
+## Full — Evidence-Gated Verification
+
+For high-stakes code, combine scope, executable patterns, and per-requirement verification links. The agent provides test evidence for each requirement. Sodide runs the linked tests, presents results with a test pyramid breakdown, then runs all executable patterns as a second independent layer.
+
+```markdown
+---
+title: Payment Processing
+modules: [src/payments/, src/billing/]
+patterns:
+  - no direct Stripe API calls outside src/payments/stripe/
+  - "!npx tsc --noEmit --strict"
+  - "!npx madge --circular --extensions ts src/payments/"
+  - "!npx eslint src/payments/ --max-warnings 0"
+---
+# Payment Processing
+
+## Checkout
+- [ ] Process credit card payment
+- [ ] Apply discount codes
+
+## Compliance
+- [ ] PCI-sensitive data never logged
+- [ ] All payment events in audit trail
+```
+
+The verify output includes:
+- Test pyramid breakdown (unit / integration / e2e counts per requirement)
+- Scope compliance report (which files changed, which were out of bounds)
+- Pattern results (each executable pattern exit code and output)
+
+Human review sits on top of this. After seeing the evidence, you add structural assertions — more executable patterns — based on what you actually observed. The harness grows to capture what you learned.
+
+Full rigor is for auth, payments, compliance, and anything security-sensitive.
+
+---
+
+## Choosing Your Level
+
+| Code | Level |
+|---|---|
+| Internal utilities, scripts, throwaway tooling | Light |
+| API endpoints, data models, most features | Medium |
+| Auth, payments, compliance, security-sensitive | Full |
+
+The decision is not permanent. Start light, ship, watch where the agent strays. When you find a mistake, encode the invariant as a pattern. The spec becomes a record of everything you've learned about where that code can go wrong.
+
+---
+
+## Verification Is Whatever You Want
+
+Sodide doesn't impose a test framework or a fixed verification pipeline. Verification links run shell commands — which means they can do anything a shell can do.
+
+UI specs can take screenshots. Performance tests can measure latency. Build checks can scan output logs. If a shell command exits `0`, the requirement passes.
+
+```markdown
+- [ ] Login page renders correctly [[ !npx playwright screenshot login.html ]]
+- [ ] API responds under 200ms [[ !sh -c "curl -w '%{time_total}' localhost:3000/api | awk '{if ($1 > 0.2) exit 1}'" ]]
+- [ ] No console errors in production build [[ !sh -c "npm run build 2>&1 | grep -c 'error' | xargs test 0 -eq" ]]
+```
+
+Think of it as git and Playwright having a baby: every verification is reproducible, diffable, and composable with the rest of your spec. Mix test framework links with shell assertions freely — Sodide runs them all and presents unified results.

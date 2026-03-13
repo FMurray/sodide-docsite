@@ -1,6 +1,90 @@
 ---
-title: "multiple-specs"
-description: "Example: multiple-specs"
+title: Multiple Specs
+description: Multi-spec project with --spec filtering and executable frontmatter patterns.
 ---
 
-Coming soon.
+import { Aside } from '@astrojs/starlight/components';
+
+A project with two spec files. Run all specs at once or target one with `--spec`. The AUTH spec also demonstrates executable patterns in frontmatter.
+
+## The Specs
+
+**AUTH.spec.md**
+
+```markdown
+---
+title: Authentication
+modules:
+  - src/auth.py
+patterns:
+  - "!grep -q 'import hashlib' src/auth.py"
+---
+# Authentication
+User authentication with hashed passwords.
+## Requirements
+- [ ] Register stores hashed password [[ tests/test_auth.py:test_register ]]
+- [ ] Login succeeds with correct password [[ tests/test_auth.py:test_login_success ]]
+- [ ] Login fails with wrong password [[ tests/test_auth.py:test_login_failure ]]
+- [ ] Passwords are never stored in plaintext
+```
+
+**VALIDATION.spec.md** (also in the project)
+
+```markdown
+---
+title: Input Validation
+modules:
+  - src/validation.py
+---
+# Input Validation
+## Requirements
+- [ ] Email address must contain @ symbol [[ tests/test_validation.py:test_email_format ]]
+- [ ] Username must be between 3 and 32 characters [[ tests/test_validation.py:test_username_length ]]
+- [ ] Password must be at least 8 characters [[ tests/test_validation.py:test_password_length ]]
+```
+
+## Run It
+
+Verify all specs in the project:
+
+```sh
+sodide verify examples/04-multiple-specs
+```
+
+Verify just the AUTH spec:
+
+```sh
+sodide verify examples/04-multiple-specs --spec AUTH
+```
+
+Expected output for `--spec AUTH`:
+
+```
+AUTH (Authentication)
+------------------------------------------------------------
+  ✓ Register stores hashed password
+      0 e2e, 0 integration, 1 unit | src/auth.py +22/-0
+  ✓ Login succeeds with correct password
+      0 e2e, 0 integration, 1 unit | src/auth.py +15/-0
+  ✓ Login fails with wrong password
+      0 e2e, 0 integration, 1 unit | src/auth.py +8/-0
+  · Passwords are never stored in plaintext
+      (no evidence)
+  Patterns: ✓ !grep -q 'import hashlib' src/auth.py
+  Scope: 0 violations
+  3 verified, 0 failing, 1 no evidence.
+```
+
+## What to Notice
+
+<Aside type="note" title="Executable patterns in frontmatter">
+The `patterns` field in AUTH's frontmatter includes `"!grep -q 'import hashlib' src/auth.py"`. This is an executable pattern — sodide runs it on every `verify` pass. If the command exits non-zero, the spec reports a pattern violation. Here it asserts that `hashlib` is imported, enforcing the architectural rule that password hashing uses the standard library rather than a third-party dependency.
+</Aside>
+
+<Aside type="note" title="--spec filters to one spec">
+`sodide verify --spec AUTH` runs only the AUTH spec, skipping VALIDATION entirely. The spec ID is the filename without `.spec.md`. Use `--spec` during focused development to keep output tight, and drop the flag for a full project sweep before merging.
+</Aside>
+
+<Aside type="note" title="Requirements without links are descriptive">
+"Passwords are never stored in plaintext" has no verification link. It appears as `·` (no evidence) in the output. Descriptive requirements are useful for encoding intent that is hard to test directly — they communicate a constraint to agents and reviewers even when no automated check enforces it. They can be given a link later once a test or shell check is written.
+</Aside>

@@ -3,4 +3,94 @@ title: Configuration
 description: sodide.toml reference
 ---
 
-Coming soon.
+`sodide.toml` is an optional project-level configuration file placed at the repository root. Sodide works without it using sensible defaults.
+
+---
+
+## Spec Discovery
+
+Control where sodide looks for `.spec.md` files with `specs_dir`.
+
+```toml
+specs_dir = "./specs"
+```
+
+Default: `./specs`. Sodide searches this directory recursively for `.spec.md` files.
+
+---
+
+## Test Framework Configuration
+
+Define how sodide finds and runs tests by declaring one or more `[frameworks.<name>]` sections.
+
+```toml
+[frameworks.pytest]
+test_dirs = ["tests/"]
+run_command = "pytest"
+run_single = "pytest {file}::{id}"
+file_patterns = ["**/*.py"]
+
+[frameworks.playwright]
+test_dirs = ["e2e/"]
+run_command = "npx playwright test"
+run_single = "npx playwright test {file} -g \"{id}\""
+file_patterns = ["**/*.e2e.ts", "**/*.spec.ts"]
+```
+
+### Fields
+
+| Field | Description |
+|---|---|
+| `test_dirs` | Directories containing tests for this framework. |
+| `run_command` | Command to run all tests. |
+| `run_single` | Template to run a single test. `{file}` and `{id}` are substituted at runtime. |
+| `file_patterns` | Glob patterns matching test files. |
+
+---
+
+## Common Configurations
+
+### Rust (cargo test)
+
+```toml
+[frameworks.cargo]
+test_dirs = ["tests/", "src/"]
+run_command = "cargo test"
+run_single = "cargo test {id} -- --exact"
+file_patterns = ["**/*.rs"]
+```
+
+### Jest
+
+```toml
+[frameworks.jest]
+test_dirs = ["__tests__/", "src/"]
+run_command = "npx jest"
+run_single = "npx jest {file} -t \"{id}\""
+file_patterns = ["**/*.test.ts", "**/*.test.js"]
+```
+
+---
+
+## Full Example
+
+A complete annotated `sodide.toml`:
+
+```toml
+# Where to find spec files
+specs_dir = "./specs"
+
+# Python test framework
+[frameworks.pytest]
+test_dirs = ["tests/"]
+run_command = "pytest"
+run_single = "pytest {file}::{id}"
+file_patterns = ["**/*.py"]
+
+# E2E test framework
+[frameworks.playwright]
+test_dirs = ["e2e/"]
+run_command = "npx playwright test"
+run_single = "npx playwright test {file} -g \"{id}\""
+file_patterns = ["**/*.e2e.ts", "**/*.spec.ts"]
+```

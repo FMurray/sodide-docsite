@@ -1,6 +1,73 @@
 ---
-title: "mixed-states"
-description: "Example: mixed-states"
+title: Mixed States
+description: All three requirement states in one spec — verified, failing, and no evidence.
 ---
 
-Coming soon.
+import { Aside } from '@astrojs/starlight/components';
+
+One spec showing all three requirement states at once: verified `✓`, failing `✗`, unverified `·`, and a requirement with no link at all.
+
+## The Spec
+
+```markdown
+---
+title: Inventory Management
+modules:
+  - src/
+---
+# Inventory Management
+Track items in a warehouse inventory system.
+## Core Operations
+- [ ] Add item increases quantity in stock [[ tests/test_inventory.py:test_add_item ]]
+- [ ] Remove item decreases quantity in stock [[ tests/test_inventory.py:test_remove_item ]]
+- [ ] Check stock returns current quantity [[ ]]
+- [ ] Low stock alert fires when quantity drops below threshold
+## Reporting
+- [ ] Generate stock report lists all items [[ tests/test_stock.py:test_stock_report ]]
+```
+
+## Run It
+
+```sh
+sodide verify examples/02-mixed-states
+```
+
+Expected output:
+
+```
+INVENTORY (Inventory Management)
+------------------------------------------------------------
+  ✓ Add item increases quantity in stock
+      0 e2e, 0 integration, 1 unit | src/inventory.py +18/-0
+  ✗ Remove item decreases quantity in stock
+      0 e2e, 0 integration, 1 unit | src/inventory.py +10/-0
+      unit ✗ test_remove_item → AssertionError: expected 4 but got 5
+  · Check stock returns current quantity
+      (no evidence)
+  · Low stock alert fires when quantity drops below threshold
+      (no evidence)
+  ✓ Generate stock report lists all items
+      0 e2e, 1 integration, 0 unit | src/reporting.py +31/-0
+  Scope: 0 violations
+  2 verified, 1 failing, 2 no evidence.
+```
+
+## What to Notice
+
+<Aside type="note" title="Empty link [[ ]] vs no link at all">
+`[[ ]]` and a missing link are different signals. An empty `[[ ]]` says "this requirement should have a test, but none has been written yet" — the requirement is explicitly unverified. A requirement with no brackets at all, like the low stock alert line, is purely descriptive; no evidence is expected or tracked. Both appear as `·` in the output, but the distinction matters when reviewing coverage.
+</Aside>
+
+<Aside type="note" title="The three symbols">
+| Symbol | Meaning |
+|--------|---------|
+| `✓` | Verified — all linked tests pass |
+| `✗` | Failing — evidence exists but one or more linked tests are red |
+| `·` | No evidence — nothing linked or links are empty |
+
+A failing `✗` requirement shows the test name and the assertion that broke, making it easy to jump straight to the failure without re-running the suite manually.
+</Aside>
+
+<Aside type="note" title="Multiple sections, one summary">
+Requirements can be grouped under any number of `##` headings for readability. sodide flattens all `- [ ]` items across all sections into a single list for verification, then reports them in order. The section headings are preserved for display only.
+</Aside>

@@ -1,6 +1,229 @@
 ---
 title: Spec Format
-description: The .spec.md file format
+description: The .spec.md file format reference
 ---
 
-Coming soon.
+Specs are `.spec.md` files — Markdown files with optional YAML frontmatter. They define what a feature should do and, optionally, how to verify it.
+
+## File Naming
+
+Spec files end in `.spec.md`. The spec ID is derived from the filename, minus the `.spec.md` suffix.
+
+```
+specs/CALCULATOR.spec.md     →  ID: CALCULATOR
+specs/engine/PARSER.spec.md  →  ID: engine/PARSER
+```
+
+Convention: store specs in a top-level `specs/` directory. Subdirectories create hierarchical IDs.
+
+---
+
+## Frontmatter
+
+Frontmatter is optional. When present, it must be a valid YAML block at the top of the file.
+
+```yaml
+---
+title: Workshop Management
+modules: [src/workshops/, src/db/workshops.ts]
+patterns:
+  - CRUD handlers in src/workshops/handlers/
+  - "!npx tsc --noEmit"
+---
+```
+
+### Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `title` | string | Display name for the spec. Defaults to the spec ID if omitted. |
+| `modules` | list | Scope boundaries — paths where agents are allowed to make changes. |
+| `patterns` | list | Architectural constraints passed to agents or run as shell commands. |
+
+---
+
+## Requirements
+
+Requirements are extracted from checkbox items in the Markdown body. Any line matching `- [ ]` is treated as a requirement.
+
+```markdown
+# Shopping Cart
+
+## Adding Items
+- [ ] Add item to cart
+- [ ] Add item with quantity greater than one
+
+## Removing Items
+- [ ] Remove item from cart
+- [ ] Removing a non-existent item is a no-op
+```
+
+Requirements can be grouped under `##` headings for organization. Headings, prose, and code blocks are ignored during extraction — only `- [ ]` lines become requirements.
+
+---
+
+## Verification Links
+
+Attach a test to a requirement using `[[ file:test_name ]]` syntax at the end of the line.
+
+```markdown
+- [ ] Addition returns the sum [[ tests/test_calc.py:test_add ]]
+```
+
+Multiple verifiers are comma-separated inside the brackets:
+
+```markdown
+- [ ] Create user [[ tests/test_user.py:test_create, tests/test_user.py:TestUser::test_create_fields ]]
+```
+
+During `sodide verify`, each linked test is run. The requirement passes only if all linked tests pass.
+
+---
+
+## Shell Command Links
+
+For verification that doesn't rely on a test framework, prefix the command with `!` inside the brackets.
+
+```markdown
+- [ ] Source file exists [[ !test -f src/app.py ]]
+- [ ] No hardcoded secrets [[ !sh -c "! grep -q 'SECRET_KEY' src/app.py" ]]
+```
+
+The requirement passes if the shell command exits with code `0`.
+
+---
+
+## Spec Links
+
+Cross-reference another spec with `[[SPEC_ID]]`. Link to a specific heading with `[[SPEC_ID#heading]]`.
+
+```markdown
+See [[auth/LOGIN]] for session behavior.
+Pagination rules are defined in [[SHARED#pagination]].
+```
+
+Link to a heading within the same spec using `[[#heading]]`:
+
+```markdown
+See [[#Compliance]] for audit requirements.
+```
+
+---
+
+## Doc References
+
+Link to documentation files using their path, with or without a section anchor.
+
+```markdown
+[[docs/architecture.md]]
+[[docs/architecture.md#data-flow]]
+```
+
+---
+
+## Patterns
+
+Patterns appear in the frontmatter `patterns:` list. There are two types.
+
+### Descriptive Patterns
+
+Plain text. Passed to the agent as architectural instructions.
+
+```yaml
+patterns:
+  - CRUD handlers in src/workshops/handlers/
+  - all database access goes through the repository layer
+  - never throw raw database errors to the HTTP layer
+```
+
+### Executable Patterns
+
+Prefixed with `!`. Run as shell commands during `sodide verify`. The spec fails if any executable pattern exits non-zero.
+
+```yaml
+patterns:
+  - "!cargo clippy -- -D warnings"
+  - "!npx tsc --noEmit"
+  - "!npx madge --circular src/"
+  - "!grep -q 'class FriendRequest' src/models.py"
+```
+
+Common uses:
+
+| Command | What it checks |
+|---|---|
+| `!npx tsc --noEmit` | No TypeScript type errors |
+| `!cargo clippy -- -D warnings` | No Rust compiler warnings |
+| `!npx madge --circular src/` | No circular imports |
+| `!python -m pytest --tb=no -q` | All tests pass |
+| `!grep -q 'pattern' file` | Structural assertion about source |
+
+---
+
+## Module Scope
+
+The `modules:` list declares which paths agents are permitted to modify. Sodide traces all git changes and flags any modifications outside the declared scope.
+
+```yaml
+modules:
+  - src/payments/
+  - src/billing/
+  - tests/test_payments.py
+```
+
+Both files and directories are valid entries. Without a `modules:` field, no scope checking is performed.
+
+---
+
+## Complete Examples
+
+### Minimal
+
+No frontmatter. Requirements only.
+
+```markdown
+# Shopping Cart
+- [ ] Add item to cart
+- [ ] Remove item from cart
+```
+
+### Medium
+
+Scope and descriptive patterns.
+
+```markdown
+---
+modules: [src/cart/]
+patterns:
+  - all cart mutations go through src/cart/service.py
+---
+
+# Shopping Cart
+- [ ] Add item to cart
+- [ ] Remove item from cart
+```
+
+### Full Rigor
+
+Scope, executable patterns, and verification links.
+
+```markdown
+---
+title: Payment Processing
+modules: [src/payments/, src/billing/]
+patterns:
+  - no direct Stripe API calls outside src/payments/stripe/
+  - "!npx tsc --noEmit --strict"
+  - "!npx madge --circular --extensions ts src/payments/"
+---
+
+# Payment Processing
+
+## Checkout
+- [ ] Process credit card payment [[ tests/test_payments.py:test_charge ]]
+- [ ] Apply discount codes [[ tests/test_payments.py:test_discount ]]
+
+## Compliance
+- [ ] PCI-sensitive data never logged
+- [ ] All payment events in audit trail
+```

@@ -1,6 +1,57 @@
 ---
 title: "sodide context"
-description: "CLI reference for sodide context"
+description: Generate a structured agent prompt for a spec.
 ---
 
-Coming soon.
+## Synopsis
+
+```
+sodide context <SPEC>
+```
+
+## Description
+
+`sodide context` reads the named spec and emits a structured prompt to stdout: requirements, module scope, executable patterns, descriptive patterns, and the current verification state of each requirement. It does not launch an agent. Use it when you want to pipe sodide's context directly into an agent or script, or when you need to inspect exactly what `sodide implement` would send to an agent before launching one.
+
+## Arguments
+
+| Argument | Description |
+|---|---|
+| `<SPEC>` | The spec ID to generate context for. Required. Matches the filename without the `.spec.md` suffix (e.g., `WORKSHOP`, `auth/LOGIN`). |
+
+## Options
+
+`sodide context` has no options. Output is always written to stdout.
+
+## Examples
+
+**Print context for a spec:**
+
+```sh
+sodide context WORKSHOP
+```
+
+**Pipe context directly to an agent CLI:**
+
+```sh
+sodide context WORKSHOP | my-agent --stdin
+```
+
+**Capture context to a file for review:**
+
+```sh
+sodide context WORKSHOP > workshop-context.txt
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|---|---|
+| `0` | Context generated and written to stdout. |
+| `2` | An error occurred (spec not found, parse failure, I/O error). |
+
+## See Also
+
+- [sodide implement](/sodide-docsite/cli/implement/) — generate context and launch an agent in one step
+- [sodide verify](/sodide-docsite/cli/verify/) — check current requirement status
+- [Spec Format](/sodide-docsite/guides/spec-format/) — spec file structure and fields
