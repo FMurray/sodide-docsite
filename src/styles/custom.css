@@ -1,0 +1,277 @@
+/* ═══════════════════════════════════════════════════════════════════
+   sodide docs — custom Starlight theme
+   Maps the landing page's GitHub-dark palette onto Starlight's
+   design tokens. Dark-only (no light mode toggle).
+   ═══════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ── Dark mode color mapping ── */
+:root {
+	/*
+	   Landing page palette → Starlight tokens
+	   --bg: #0d1117          → --sl-color-black  (page background)
+	   --bg-surface: #161b22  → --sl-color-gray-6 (sidebar, nav, cards)
+	   --bg-surface-raised: #1c2129 → --sl-color-gray-5 (hover, inline code)
+	   --border: #30363d      → --sl-color-gray-4 (borders, rules)
+	   --border-subtle: #21262d → hairlines
+	   --text: #e6edf3        → --sl-color-white  (headings)
+	   --text-muted: #8b949e  → --sl-color-gray-2 (body text)
+	   --text-subtle: #6e7681 → --sl-color-gray-3 (secondary text)
+	   --accent: #58a6ff      → accent color
+	*/
+
+	/* Gray scale — tuned to sodide's palette */
+	--sl-color-white: #e6edf3;
+	--sl-color-gray-1: #c9d1d9;
+	--sl-color-gray-2: #8b949e;
+	--sl-color-gray-3: #6e7681;
+	--sl-color-gray-4: #30363d;
+	--sl-color-gray-5: #21262d;
+	--sl-color-gray-6: #161b22;
+	--sl-color-black: #0d1117;
+
+	/* Accent — sodide blue */
+	--sl-color-accent-low: #0c2d6b;
+	--sl-color-accent: #58a6ff;
+	--sl-color-accent-high: #a5d6ff;
+
+	/* Semantic surfaces */
+	--sl-color-bg: #0d1117;
+	--sl-color-bg-nav: rgba(13, 17, 23, 0.92);
+	--sl-color-bg-sidebar: #0d1117;
+	--sl-color-bg-inline-code: #1c2129;
+	--sl-color-bg-accent: #58a6ff;
+
+	/* Borders */
+	--sl-color-hairline-light: #21262d;
+	--sl-color-hairline: #161b22;
+	--sl-color-hairline-shade: #0d1117;
+
+	/* Text */
+	--sl-color-text: #8b949e;
+	--sl-color-text-accent: #a5d6ff;
+	--sl-color-text-invert: #0d1117;
+
+	/* Semantic colors — matched to landing page */
+	--sl-hue-green: 130;
+	--sl-color-green-low: rgba(63, 185, 80, 0.15);
+	--sl-color-green: #3fb950;
+	--sl-color-green-high: #56d364;
+
+	--sl-hue-blue: 212;
+	--sl-color-blue-low: rgba(88, 166, 255, 0.15);
+	--sl-color-blue: #58a6ff;
+	--sl-color-blue-high: #a5d6ff;
+
+	--sl-hue-orange: 38;
+	--sl-color-orange-low: rgba(210, 153, 34, 0.15);
+	--sl-color-orange: #d29922;
+	--sl-color-orange-high: #e3b341;
+
+	--sl-hue-red: 356;
+	--sl-color-red-low: rgba(248, 81, 73, 0.15);
+	--sl-color-red: #f85149;
+	--sl-color-red-high: #ff7b72;
+
+	--sl-hue-purple: 263;
+	--sl-color-purple-low: rgba(188, 140, 255, 0.12);
+	--sl-color-purple: #bc8cff;
+	--sl-color-purple-high: #d2a8ff;
+
+	/* Backdrop */
+	--sl-color-backdrop-overlay: rgba(1, 4, 9, 0.75);
+
+	/* Typography */
+	--sl-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	--sl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+	/* Shadows — deeper for dark theme */
+	--sl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+	--sl-shadow-md: 0 3px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+	--sl-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Kill light mode — sodide is dark only ── */
+:root[data-theme='light'] {
+	--sl-color-white: #e6edf3;
+	--sl-color-gray-1: #c9d1d9;
+	--sl-color-gray-2: #8b949e;
+	--sl-color-gray-3: #6e7681;
+	--sl-color-gray-4: #30363d;
+	--sl-color-gray-5: #21262d;
+	--sl-color-gray-6: #161b22;
+	--sl-color-gray-7: #0d1117;
+	--sl-color-black: #0d1117;
+
+	--sl-color-accent-high: #a5d6ff;
+	--sl-color-accent: #58a6ff;
+	--sl-color-accent-low: #0c2d6b;
+
+	--sl-color-text: #8b949e;
+	--sl-color-text-accent: #58a6ff;
+	--sl-color-text-invert: #0d1117;
+	--sl-color-bg: #0d1117;
+	--sl-color-bg-nav: rgba(13, 17, 23, 0.92);
+	--sl-color-bg-sidebar: #0d1117;
+	--sl-color-bg-inline-code: #1c2129;
+	--sl-color-bg-accent: #58a6ff;
+	--sl-color-hairline-light: #21262d;
+	--sl-color-hairline: #161b22;
+	--sl-color-hairline-shade: #0d1117;
+	--sl-color-backdrop-overlay: rgba(1, 4, 9, 0.75);
+
+	--sl-color-green-low: rgba(63, 185, 80, 0.15);
+	--sl-color-green: #3fb950;
+	--sl-color-green-high: #56d364;
+	--sl-color-blue-low: rgba(88, 166, 255, 0.15);
+	--sl-color-blue: #58a6ff;
+	--sl-color-blue-high: #a5d6ff;
+	--sl-color-orange-low: rgba(210, 153, 34, 0.15);
+	--sl-color-orange: #d29922;
+	--sl-color-orange-high: #e3b341;
+	--sl-color-red-low: rgba(248, 81, 73, 0.15);
+	--sl-color-red: #f85149;
+	--sl-color-red-high: #ff7b72;
+	--sl-color-purple-low: rgba(188, 140, 255, 0.12);
+	--sl-color-purple: #bc8cff;
+	--sl-color-purple-high: #d2a8ff;
+
+	--sl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+	--sl-shadow-md: 0 3px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+	--sl-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Hide theme toggle — dark only ── */
+starlight-theme-select {
+	display: none !important;
+}
+
+/* ── Nav — frosted glass like landing page ── */
+.header {
+	backdrop-filter: blur(12px) !important;
+	-webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* ── Sidebar refinements ── */
+nav.sidebar {
+	border-right-color: #21262d;
+}
+
+nav.sidebar a {
+	transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+nav.sidebar a[aria-current='page'] {
+	color: #e6edf3;
+	background-color: rgba(88, 166, 255, 0.1);
+	border-color: #58a6ff;
+}
+
+/* ── Code blocks — match landing page aesthetic ── */
+.expressive-code {
+	--ec-brdCol: #30363d !important;
+	--ec-codeBg: #161b22 !important;
+	--ec-frm-edBg: #161b22 !important;
+	--ec-frm-edTabBarBg: #0d1117 !important;
+	--ec-frm-edTabBarBrdBtm: #21262d !important;
+	--ec-frm-edActTabBg: #161b22 !important;
+	--ec-frm-edActTabBrdBtm: #58a6ff !important;
+	--ec-frm-edActTabBrdTop: transparent !important;
+}
+
+/* ── Content — breathing room ── */
+.sl-markdown-content {
+	line-height: 1.7;
+}
+
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3,
+.sl-markdown-content h4 {
+	color: #e6edf3;
+	letter-spacing: -0.02em;
+}
+
+.sl-markdown-content h1 {
+	font-weight: 700;
+	letter-spacing: -0.03em;
+}
+
+.sl-markdown-content a {
+	color: #58a6ff;
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+
+.sl-markdown-content a:hover {
+	color: #a5d6ff;
+	text-decoration: underline;
+}
+
+/* Inline code */
+.sl-markdown-content :not(pre) > code {
+	background: #1c2129;
+	border: 1px solid #30363d;
+	border-radius: 4px;
+	padding: 0.15em 0.35em;
+	font-size: 0.875em;
+	color: #e6edf3;
+}
+
+/* Tables */
+.sl-markdown-content table {
+	border-color: #30363d;
+}
+
+.sl-markdown-content th {
+	background: #161b22;
+	color: #e6edf3;
+	border-color: #30363d;
+}
+
+.sl-markdown-content td {
+	border-color: #21262d;
+}
+
+.sl-markdown-content tr:hover td {
+	background: rgba(22, 27, 34, 0.5);
+}
+
+/* Blockquotes */
+.sl-markdown-content blockquote {
+	border-left-color: #30363d;
+	color: #8b949e;
+}
+
+/* Horizontal rules */
+.sl-markdown-content hr {
+	border-color: #21262d;
+}
+
+/* ── Asides — match landing page card styling ── */
+.starlight-aside {
+	border-radius: 8px;
+}
+
+/* ── Page title ── */
+.content-panel h1 {
+	letter-spacing: -0.03em;
+}
+
+/* ── Footer / pagination links ── */
+.pagination-links a {
+	border-color: #30363d;
+	border-radius: 8px;
+	transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.pagination-links a:hover {
+	border-color: #58a6ff;
+	background-color: rgba(88, 166, 255, 0.05);
+}
+
+/* ── Search ── */
+dialog::backdrop {
+	background-color: rgba(1, 4, 9, 0.75);
+}

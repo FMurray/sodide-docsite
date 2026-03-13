@@ -9,6 +9,7 @@ export default defineConfig({
 		starlight({
 			title: 'sodide',
 			description: 'Spec-driven development for AI agents',
+			customCss: ['./src/styles/custom.css'],
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/FMurray/sodide-docsite' },
 			],
