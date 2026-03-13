@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sodide — landing page concept v5</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0d1117;
+    --bg-surface: #161b22;
+    --bg-surface-raised: #1c2129;
+    --bg-sidebar: #0d1117;
+    --border: #30363d;
+    --border-subtle: #21262d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-subtle: #6e7681;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --green-dim: rgba(63, 185, 80, 0.15);
+    --yellow: #d29922;
+    --yellow-dim: rgba(210, 153, 34, 0.15);
+    --purple: #bc8cff;
+    --purple-dim: rgba(188, 140, 255, 0.12);
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    background: rgba(13, 17, 23, 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0 2rem;
+    height: 48px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  nav .logo {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  nav .logo span { color: var(--text-muted); font-weight: 400; }
+  nav .links { display: flex; gap: 1.5rem; align-items: center; }
+  nav .links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.2s;
+  }
+  nav .links a:hover { color: var(--text); }
+  nav .links .cta-btn {
+    background: var(--text);
+    color: var(--bg);
+    padding: 0.35rem 0.9rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+
+  /* ── LAYOUT ── */
+  .app-layout {
+    display: flex;
+    margin-top: 48px;
+    min-height: calc(100vh - 48px);
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-subtle);
+    padding: 1rem 0;
+    position: fixed;
+    top: 48px;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    z-index: 50;
+  }
+
+  .tree-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-subtle);
+    padding: 0.25rem 0.75rem 0.4rem;
+  }
+
+  .tree-section { padding: 0 0.75rem; margin-bottom: 0.25rem; }
+
+  .tree-folder {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-subtle);
+    padding: 0.3rem 0.5rem;
+    cursor: default;
+    user-select: none;
+  }
+  .tree-folder .chevron { font-size: 0.55rem; width: 10px; transition: transform 0.2s; }
+  .tree-folder .folder-icon { color: var(--accent); font-size: 0.65rem; }
+
+  .tree-file {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    padding: 0.3rem 0.5rem 0.3rem 1.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    position: relative;
+  }
+  .tree-file:hover { background: var(--bg-surface); color: var(--text); }
+  .tree-file.active {
+    background: rgba(88, 166, 255, 0.08);
+    color: var(--text);
+  }
+  .tree-file.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 2px; bottom: 2px;
+    width: 2px;
+    background: var(--accent);
+    border-radius: 1px;
+  }
+  .tree-file .file-icon { color: var(--text-subtle); font-size: 0.6rem; flex-shrink: 0; }
+  .tree-file.active .file-icon { color: var(--accent); }
+  .tree-file .status { margin-left: auto; font-size: 0.55rem; flex-shrink: 0; }
+  .status.pass { color: var(--green); }
+  .status.pending { color: var(--yellow); }
+
+  .tree-divider {
+    border: none;
+    border-top: 1px solid var(--border-subtle);
+    margin: 0.75rem 0.75rem;
+  }
+
+  /* ── MAIN ── */
+  .main-content {
+    margin-left: 260px;
+    flex: 1;
+    min-height: 100vh;
+  }
+
+  .main-content > section {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* ── HERO ── */
+  .hero-section {
+    padding: 5rem 4rem 4rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .file-tab {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    padding: 0.35rem 0.9rem;
+    border-radius: 6px 6px 0 0;
+    margin-bottom: -1px;
+    position: relative;
+    z-index: 1;
+  }
+  .file-tab .icon { color: var(--accent); }
+
+  .spec-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 0 8px 8px 8px;
+    padding: 2.5rem 3rem;
+  }
+
+  .verify-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--green);
+    background: var(--green-dim);
+    padding: 0.25rem 0.7rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+  }
+
+  .spec-panel h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.12;
+    margin-bottom: 0.75rem;
+  }
+
+  .spec-panel .tagline {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 560px;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+
+  .hero-buttons { display: flex; gap: 0.75rem; }
+  .hero-buttons a {
+    text-decoration: none; font-weight: 600; font-size: 0.8rem;
+    padding: 0.5rem 1.2rem; border-radius: 6px;
+  }
+  .hero-buttons .primary { background: #e6edf3; color: #0d1117; }
+  .hero-buttons .secondary { border: 1px solid #30363d; color: #8b949e; }
+
+  /* ── SPEC SECTIONS ── */
+  .spec-section {
+    padding: 4rem 4rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .spec-section:last-of-type { border-bottom: none; }
+  .spec-section .spec-panel { padding: 2rem 2.5rem; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-subtle);
+    margin-bottom: 1.25rem;
+  }
+
+  .spec-section h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  .spec-section .desc {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-width: 560px;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Requirements */
+  .req {
+    background: var(--bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.6rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .req-check {
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem;
+    margin-top: 1px;
+    background: var(--green-dim); color: var(--green);
+  }
+
+  .req-text h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem; }
+  .req-text p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+
+  .req-tag {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--text-subtle);
+    background: var(--bg-surface);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    margin-left: auto;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .evidence-block {
+    margin-top: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    background: var(--bg-surface);
+    border-radius: 4px;
+    border-left: 2px solid var(--green);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .evidence-block .ev-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-subtle);
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+  .evidence-block .metric { color: var(--green); }
+
+  /* Links / backlinks */
+  .spec-link {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dotted rgba(88, 166, 255, 0.3);
+    font-family: var(--mono);
+    font-size: inherit;
+  }
+  .spec-link:hover { border-bottom-color: var(--accent); }
+
+  .backlinks {
+    margin-top: 1.25rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg);
+    border: 1px dashed var(--border-subtle);
+    border-radius: 6px;
+  }
+  .backlinks .bl-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-subtle);
+    margin-bottom: 0.4rem;
+  }
+  .backlinks a {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-decoration: none;
+    background: rgba(88, 166, 255, 0.06);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    margin: 0.15rem 0.25rem 0.15rem 0;
+    border: 1px solid rgba(88, 166, 255, 0.12);
+  }
+  .backlinks a:hover { background: rgba(88, 166, 255, 0.12); }
+
+  /* Implement button */
+  .implement-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(88, 166, 255, 0.1);
+    border: 1px solid rgba(88, 166, 255, 0.25);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    cursor: default;
+  }
+  .implement-btn .play { font-size: 0.65rem; }
+
+  /* Agent badges */
+  .agent-badge {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    margin-right: 0.4rem;
+    margin-top: 0.4rem;
+  }
+  .agent-badge.claude {
+    background: rgba(210, 153, 34, 0.12);
+    color: var(--yellow);
+    border: 1px solid rgba(210, 153, 34, 0.2);
+  }
+  .agent-badge.codex {
+    background: var(--purple-dim);
+    color: var(--purple);
+    border: 1px solid rgba(188, 140, 255, 0.2);
+  }
+  .agent-badge .dot { font-size: 0.5rem; }
+
+  /* Evidence types in verify section */
+  .evidence-type {
+    background: var(--bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.6rem;
+  }
+  .evidence-type .ev-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .evidence-type .ev-icon {
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem;
+    flex-shrink: 0;
+  }
+  .ev-icon.diff { background: rgba(88, 166, 255, 0.12); color: var(--accent); }
+  .ev-icon.test { background: var(--green-dim); color: var(--green); }
+  .ev-icon.screenshot { background: var(--purple-dim); color: var(--purple); }
+  .ev-icon.summary { background: var(--yellow-dim); color: var(--yellow); }
+
+  .evidence-type h4 {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .evidence-type p {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* Fake diff preview */
+  .diff-preview {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-surface);
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    line-height: 1.7;
+    overflow: hidden;
+  }
+  .diff-preview .added { color: var(--green); }
+  .diff-preview .removed { color: var(--red); }
+  .diff-preview .context { color: var(--text-subtle); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .sidebar {
+      position: fixed;
+      left: -260px;
+      transition: left 0.25s ease;
+      z-index: 200;
+      box-shadow: none;
+    }
+    .sidebar.open {
+      left: 0;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+    }
+    .main-content {
+      margin-left: 0;
+    }
+    .hero-section, .spec-section, .cta-section, footer {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+    .spec-panel {
+      padding: 1.5rem 1.5rem;
+    }
+    .spec-panel h1 {
+      font-size: 2rem;
+    }
+    .spec-section h2 {
+      font-size: 1.3rem;
+    }
+    nav {
+      padding: 0 1rem;
+    }
+    nav .links a:not(.cta-btn) {
+      display: none;
+    }
+    nav .links {
+      gap: 0;
+    }
+    .mobile-toggle {
+      display: flex;
+    }
+    .mobile-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 150;
+    }
+    .mobile-overlay.open {
+      display: block;
+    }
+  }
+
+  @media (min-width: 769px) {
+    .mobile-toggle, .mobile-overlay {
+      display: none !important;
+    }
+  }
+
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    bottom: 1.25rem;
+    left: 1.25rem;
+    z-index: 250;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    transition: background 0.15s;
+  }
+  .mobile-toggle:hover {
+    background: var(--bg-surface-raised);
+    color: var(--text);
+  }
+
+  details summary::-webkit-details-marker { display: none; }
+  details summary .chevron-expand { transition: transform 0.15s; display: inline-block; }
+  details[open] summary .chevron-expand { transform: rotate(90deg); }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 4rem 4rem 6rem;
+    text-align: center;
+  }
+  .cta-section h2 {
+    font-size: 1.8rem; font-weight: 700;
+    margin-bottom: 0.75rem; letter-spacing: -0.02em;
+  }
+  .cta-section p { color: var(--text-muted); margin-bottom: 2rem; font-size: 1rem; }
+  .cta-buttons { display: flex; gap: 1rem; justify-content: center; }
+  .cta-buttons a {
+    padding: 0.6rem 1.5rem; border-radius: 6px;
+    text-decoration: none; font-weight: 600; font-size: 0.9rem;
+  }
+  .cta-buttons .primary { background: var(--text); color: var(--bg); }
+  .cta-buttons .secondary { border: 1px solid var(--border); color: var(--text-muted); }
+
+  footer {
+    border-top: 1px solid var(--border-subtle);
+    padding: 2rem 4rem;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-subtle);
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  footer .verified {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: var(--green); margin-bottom: 0.5rem;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">sodide <span>— markdown-driven development</span></div>
+  <div class="links">
+    <a href="#">Docs</a>
+    <a href="#">Examples</a>
+    <a href="#">GitHub</a>
+    <a href="#" class="cta-btn">Get Early Access</a>
+  </div>
+</nav>
+
+<button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle explorer">◆</button>
+<div class="mobile-overlay" onclick="toggleSidebar()"></div>
+
+<div class="app-layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="tree-label">Explorer</div>
+    <div class="tree-section">
+      <div class="tree-folder">
+        <span class="chevron">▼</span>
+        <span class="folder-icon">◆</span>
+        specs/
+      </div>
+
+      <a href="#hero" class="tree-file active" data-section="hero">
+        <span class="file-icon">◇</span>
+        SODIDE.spec.md
+        <span class="status pass">●</span>
+      </a>
+
+      <a href="#plan" class="tree-file" data-section="plan">
+        <span class="file-icon">◇</span>
+        PLAN.spec.md
+        <span class="status pass">●</span>
+      </a>
+
+      <a href="#implement" class="tree-file" data-section="implement">
+        <span class="file-icon">◇</span>
+        IMPLEMENT.spec.md
+        <span class="status pass">●</span>
+      </a>
+
+      <a href="#verify" class="tree-file" data-section="verify">
+        <span class="file-icon">◇</span>
+        VERIFY.spec.md
+        <span class="status pass">●</span>
+      </a>
+
+      <hr class="tree-divider">
+
+      <div class="tree-folder">
+        <span class="chevron">▶</span>
+        <span class="folder-icon">◆</span>
+        research/
+      </div>
+
+      <div class="tree-folder">
+        <span class="chevron">▶</span>
+        <span class="folder-icon">◆</span>
+        docs/
+      </div>
+
+      <div class="tree-folder">
+        <span class="chevron">▶</span>
+        <span class="folder-icon">◆</span>
+        examples/
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- ════ HERO ════ -->
+    <section class="hero-section" id="hero" data-section="hero">
+      <div class="file-tab">
+        <span class="icon">◆</span> SODIDE.spec.md
+      </div>
+      <div class="spec-panel">
+        <div class="verify-badge">● 3/3 verified</div>
+        <h1>Markdown-driven<br>development.</h1>
+        <p class="tagline">
+          Plan in markdown. Launch agents from the spec. See every piece of evidence — diffs, tests, screenshots — right where you wrote the intent.
+        </p>
+        <div class="hero-buttons">
+          <a href="#" class="primary">★ Star on GitHub</a>
+          <a href="#" class="secondary">Read the Docs →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ PLAN ════ -->
+    <section class="spec-section" id="plan" data-section="plan">
+      <div class="file-tab">
+        <span class="icon">◆</span> PLAN.spec.md
+      </div>
+      <div class="spec-panel">
+        <div class="verify-badge">● 3/3 verified</div>
+        <h2>Plan in connected markdown</h2>
+        <p class="desc">
+          Define architectural patterns once, then split specs however makes sense for your project. Bidirectional links connect research, planning, and implementation into a single source of truth.
+        </p>
+
+        <div class="section-label">## Requirements</div>
+
+        <div class="req" style="flex-direction: column;">
+          <div style="display: flex; align-items: flex-start; gap: 0.75rem; width: 100%;">
+            <div class="req-check">✓</div>
+            <div class="req-text">
+              <h4>Your patterns, enforced exactly</h4>
+              <p>Define patterns directly in each spec. Agents follow them — not generic best practices.</p>
+            </div>
+            <span class="req-tag" style="align-self: center;">PLAN-01</span>
+          </div>
+          <!-- Show a real spec snippet with patterns -->
+          <div style="margin-top: 0.75rem; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem 1rem; font-family: var(--mono); font-size: 0.68rem; line-height: 1.8; color: var(--text-muted); width: 100%;">
+            <div style="color: var(--text-subtle); font-size: 0.6rem; margin-bottom: 0.4rem;">AUTH.spec.md</div>
+            <div><span style="color: var(--accent);">## Patterns</span></div>
+            <div><span style="color: var(--text-subtle);">modules:</span> <span style="color: var(--green);">src/auth/**, src/middleware/auth.*</span></div>
+            <div><span style="color: var(--text-subtle);">errors:</span> <span style="color: var(--text);">Use AppError enum, never panic</span></div>
+            <div><span style="color: var(--text-subtle);">naming:</span> <span style="color: var(--text);">snake_case fns, PascalCase types</span></div>
+            <div><span style="color: var(--text-subtle);">testing:</span> <span style="color: var(--text);">Integration tests hit real DB, no mocks</span></div>
+            <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border-subtle);"><span style="color: var(--accent);">## Requirements</span></div>
+            <div><span style="color: var(--text);">- JWT validation with clock skew tolerance</span></div>
+            <div><span style="color: var(--text);">- Refresh token rotation on each use</span></div>
+            <div><span style="color: var(--text);">- Rate limit login attempts per IP</span></div>
+          </div>
+        </div>
+
+        <div class="req" style="flex-direction: column;">
+          <div style="display: flex; align-items: flex-start; gap: 0.75rem; width: 100%;">
+            <div class="req-check">✓</div>
+            <div class="req-text">
+              <h4>Scales from a napkin to a monorepo</h4>
+              <p>Same tool, same workflow. You decide how much structure you need.</p>
+            </div>
+            <span class="req-tag" style="align-self: center;">PLAN-02</span>
+          </div>
+          <!-- Two contrasting file trees -->
+          <div style="margin-top: 0.75rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; width: 100%;">
+            <!-- Simple project -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem 1rem;">
+              <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Weekend project</div>
+              <div style="font-family: var(--mono); font-size: 0.68rem; line-height: 1.9; color: var(--text-muted);">
+                <div><span style="color: var(--accent);">◆</span> specs/</div>
+                <div style="padding-left: 1rem;"><span style="color: var(--accent);">◇</span> TODO.spec.md <span style="color: var(--green); font-size: 0.55rem;">● 3 reqs</span></div>
+              </div>
+            </div>
+            <!-- Production system -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem 1rem;">
+              <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Production system</div>
+              <div style="font-family: var(--mono); font-size: 0.68rem; line-height: 1.9; color: var(--text-muted);">
+                <div><span style="color: var(--accent);">◆</span> specs/</div>
+                <div style="padding-left: 1rem;"><span style="color: var(--accent);">◇</span> ARCHITECTURE.spec.md</div>
+                <div style="padding-left: 1rem;"><span style="color: var(--accent);">◆</span> auth/</div>
+                <div style="padding-left: 2rem;"><span style="color: var(--accent);">◇</span> JWT.spec.md <span style="color: var(--green); font-size: 0.55rem;">●</span></div>
+                <div style="padding-left: 2rem;"><span style="color: var(--accent);">◇</span> OAUTH.spec.md <span style="color: var(--green); font-size: 0.55rem;">●</span></div>
+                <div style="padding-left: 1rem;"><span style="color: var(--accent);">◆</span> billing/</div>
+                <div style="padding-left: 2rem;"><span style="color: var(--accent);">◇</span> STRIPE.spec.md <span style="color: var(--yellow); font-size: 0.55rem;">●</span></div>
+                <div style="padding-left: 2rem;"><span style="color: var(--accent);">◇</span> INVOICES.spec.md <span style="color: var(--green); font-size: 0.55rem;">●</span></div>
+                <div style="padding-left: 1rem;"><span style="color: var(--accent);">◆</span> api/</div>
+                <div style="padding-left: 2rem;"><span style="color: var(--text-subtle);">◇</span> <span style="color: var(--text-subtle);">... 6 more specs</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="req" style="position: relative;">
+          <div class="req-check">✓</div>
+          <div class="req-text">
+            <h4>A knowledge graph for your codebase</h4>
+            <p style="margin-bottom: 0.75rem;">Link anything to anything — specs, research, design notes, ADRs. Build a personal wiki for your project where every connection is traced and every backlink is automatic.</p>
+            <!-- Inline autocomplete directly in the requirement -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.75rem 1rem; font-family: var(--mono); font-size: 0.72rem; line-height: 1.8; color: var(--text-muted);">
+              <div>Linked context is injected into agent sessions.</div>
+              <div>See <span style="color: var(--accent);">[[</span><span style="color: var(--text); background: rgba(88, 166, 255, 0.08); padding: 0 2px; border-radius: 2px;">IMPL-01</span><span style="border-right: 2px solid var(--accent); margin-right: 1px;">&hairsp;</span></div>
+              <div style="position: relative; margin-top: 0.3rem; margin-left: 0.5rem;">
+                <div style="background: var(--bg-surface-raised); border: 1px solid var(--border); border-radius: 6px; padding: 0.4rem 0; width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                  <a href="#implement" style="display: flex; padding: 0.35rem 0.75rem; background: rgba(88, 166, 255, 0.08); color: var(--text); font-size: 0.7rem; align-items: center; gap: 0.4rem; text-decoration: none; font-family: var(--mono);">
+                    <span style="color: var(--accent); font-size: 0.6rem;">◇</span> IMPLEMENT.spec.md → IMPL-01
+                  </a>
+                  <div style="padding: 0.35rem 0.75rem; color: var(--text-muted); font-size: 0.7rem; display: flex; align-items: center; gap: 0.4rem;">
+                    <span style="color: var(--text-subtle); font-size: 0.6rem;">◇</span> IMPLEMENT.spec.md → IMPL-02
+                  </div>
+                  <div style="padding: 0.35rem 0.75rem; color: var(--text-muted); font-size: 0.7rem; display: flex; align-items: center; gap: 0.4rem;">
+                    <span style="color: var(--text-subtle); font-size: 0.6rem;">◇</span> IMPLEMENT.spec.md → IMPL-03
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="req-tag">PLAN-03</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ IMPLEMENT ════ -->
+    <section class="spec-section" id="implement" data-section="implement">
+      <div class="file-tab">
+        <span class="icon">◆</span> IMPLEMENT.spec.md
+      </div>
+      <div class="spec-panel">
+        <div class="verify-badge">● 3/3 verified</div>
+        <h2>Launch agents from the spec</h2>
+        <p class="desc">
+          One requirement at a time or parallelize as much as you dare. Sodide handles worktrees, sandboxes, and permissions. Bring any agent — Claude Code here, Codex there.
+        </p>
+
+        <div class="section-label">## Requirements</div>
+
+        <div class="req" id="impl-01" style="flex-direction: column;">
+          <div style="display: flex; align-items: flex-start; gap: 0.75rem; width: 100%;">
+            <div class="req-check">✓</div>
+            <div class="req-text">
+              <h4>Intelligent context, not context-stuffing</h4>
+              <p>Your links become the agent's context. Sodide resolves every <code style="font-family: var(--mono); font-size: 0.8em; background: var(--bg-surface); padding: 0.1rem 0.3rem; border-radius: 3px;">[[link]]</code> in the spec and builds a scoped prompt — just what the agent needs, nothing more.</p>
+            </div>
+            <span class="req-tag" style="align-self: center;">IMPL-01</span>
+          </div>
+          <!-- Show the resolved agent prompt -->
+          <div style="margin-top: 0.75rem; width: 100%; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-subtle); background: rgba(88, 166, 255, 0.04);">
+              <span style="color: var(--accent); font-size: 0.6rem;">▶</span>
+              <span style="font-family: var(--mono); font-size: 0.65rem; color: var(--accent);">sodide implement AUTH.spec.md --req "JWT validation"</span>
+            </div>
+            <div style="padding: 0.75rem 1rem; font-family: var(--mono); font-size: 0.65rem; line-height: 1.9; color: var(--text-muted);">
+              <div style="color: var(--text-subtle); font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">Resolved agent context</div>
+              <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+                <div><span style="color: var(--accent);">requirement:</span> <span style="color: var(--text);">JWT validation with clock skew tolerance</span></div>
+                <div style="margin-top: 0.3rem; padding-top: 0.3rem; border-top: 1px solid var(--border-subtle);"><span style="color: var(--accent);">patterns</span> <span style="color: var(--text-subtle);">← from AUTH.spec.md</span></div>
+                <div style="padding-left: 0.75rem;">modules: <span style="color: var(--green);">src/auth/**, src/middleware/auth.*</span></div>
+                <div style="padding-left: 0.75rem;">errors: <span style="color: var(--text);">Use AppError enum, never panic</span></div>
+                <div style="padding-left: 0.75rem;">testing: <span style="color: var(--text);">Integration tests hit real DB, no mocks</span></div>
+                <div style="margin-top: 0.3rem; padding-top: 0.3rem; border-top: 1px solid var(--border-subtle);"><span style="color: var(--accent);">linked context</span> <span style="color: var(--text-subtle);">← resolved from [[links]]</span></div>
+                <div style="padding-left: 0.75rem;"><span style="color: var(--purple);">[[research/jwt-validation.md]]</span> <span style="color: var(--text-subtle);">— RFC 7519 notes, clock skew handling</span></div>
+                <div style="padding-left: 0.75rem;"><span style="color: var(--purple);">[[specs/TOKEN.spec.md#refresh]]</span> <span style="color: var(--text-subtle);">— refresh token rotation spec</span></div>
+                <div style="padding-left: 0.75rem;"><span style="color: var(--purple);">[[docs/adr-003-token-format.md]]</span> <span style="color: var(--text-subtle);">— why we chose opaque tokens</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="req" style="flex-direction: column;">
+          <div style="display: flex; align-items: flex-start; gap: 0.75rem; width: 100%;">
+            <div class="req-check">✓</div>
+            <div class="req-text">
+              <h4>Parallelize fearlessly</h4>
+              <p>Each agent gets its own git worktree. Sodide manages isolation, dependency ordering, and conflict resolution at merge.</p>
+            </div>
+            <span class="req-tag" style="align-self: center;">IMPL-02</span>
+          </div>
+          <!-- Parallel agent status display -->
+          <div style="margin-top: 0.75rem; width: 100%; display: flex; flex-direction: column; gap: 0.35rem;">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
+              <span class="agent-badge claude" style="margin: 0;"><span class="dot">●</span> Claude Code</span>
+              <span style="font-family: var(--mono); font-size: 0.65rem; color: var(--text);">AUTH.spec.md</span>
+              <span style="font-family: var(--mono); font-size: 0.6rem; color: var(--text-subtle); margin-left: auto;">worktree/auth-jwt</span>
+              <span style="font-family: var(--mono); font-size: 0.6rem; color: var(--green);">implementing...</span>
+            </div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
+              <span class="agent-badge codex" style="margin: 0;"><span class="dot">●</span> Codex</span>
+              <span style="font-family: var(--mono); font-size: 0.65rem; color: var(--text);">BILLING.spec.md</span>
+              <span style="font-family: var(--mono); font-size: 0.6rem; color: var(--text-subtle); margin-left: auto;">worktree/billing</span>
+              <span style="font-family: var(--mono); font-size: 0.6rem; color: var(--green);">implementing...</span>
+            </div>
+            <div style="background: var(--bg-surface); border: 1px solid rgba(63, 185, 80, 0.3); border-radius: 4px; padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
+              <span class="agent-badge claude" style="margin: 0;"><span class="dot">●</span> Claude Code</span>
+              <span style="font-family: var(--mono); font-size: 0.65rem; color: var(--text);">API.spec.md</span>
+              <span style="font-family: var(--mono); font-size: 0.6rem; color: var(--text-subtle); margin-left: auto;">worktree/api-routes</span>
+              <span style="font-family: var(--mono); font-size: 0.6rem; color: var(--green);">✓ complete — ready for verify</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="req" style="flex-direction: column;">
+          <div style="display: flex; align-items: flex-start; gap: 0.75rem; width: 100%;">
+            <div class="req-check">✓</div>
+            <div class="req-text">
+              <h4>Your workflow, supercharged</h4>
+              <p>Sodide sits on top of your existing tools. Bring your skills, subagents, hooks, and MCP servers. Nothing to replace — just a layer that makes everything traceable.</p>
+            </div>
+            <span class="req-tag" style="align-self: center;">IMPL-03</span>
+          </div>
+          <div style="margin-top: 0.75rem; width: 100%; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.45rem 0.75rem; font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+              <span style="color: var(--accent); font-size: 0.55rem;">⚡</span> skills
+            </div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.45rem 0.75rem; font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+              <span style="color: var(--purple); font-size: 0.55rem;">◈</span> subagents
+            </div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.45rem 0.75rem; font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+              <span style="color: var(--green); font-size: 0.55rem;">●</span> hooks
+            </div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.45rem 0.75rem; font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+              <span style="color: var(--yellow); font-size: 0.55rem;">◆</span> MCP servers
+            </div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.45rem 0.75rem; font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+              <span style="color: var(--text-subtle); font-size: 0.55rem;">⟐</span> CLAUDE.md / AGENTS.md
+            </div>
+          </div>
+        </div>
+
+        <div class="implement-btn">
+          <span class="play">▶</span> sodide implement --parallel AUTH.spec.md BILLING.spec.md API.spec.md
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ VERIFY ════ -->
+    <section class="spec-section" id="verify" data-section="verify">
+      <div class="file-tab">
+        <span class="icon">◆</span> VERIFY.spec.md
+      </div>
+      <div class="spec-panel">
+        <div class="verify-badge">● 4/4 verified</div>
+        <h2>Trust, but verify</h2>
+        <p class="desc">
+          Like git and Playwright had a baby. Every change is traced back to the requirement that asked for it.
+          You define what evidence looks like — diffs, tests, screenshots, perf benchmarks — and sodide collects it all
+          in one place. No mystery commits. No untraced code.
+        </p>
+
+        <div class="section-label">## You define the evidence</div>
+
+        <div class="evidence-type">
+          <div class="ev-header">
+            <div class="ev-icon diff">±</div>
+            <h4>Traced diffs</h4>
+          </div>
+          <p>You don't read 500 lines of generated code. You read the summary. Each requirement gets an AI-generated dev log — what changed, why, and anything that needs your attention.</p>
+          <!-- Single requirement evidence block -->
+          <div style="margin-top: 0.5rem; background: var(--bg); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+              <div class="req-check" style="width: 18px; height: 18px; font-size: 0.6rem;">✓</div>
+              <span style="font-size: 0.8rem; font-weight: 600;">REQ-03: User preference storage</span>
+              <span style="margin-left: auto; font-family: var(--mono); font-size: 0.6rem; color: var(--text-subtle);">3 files · +47 −3</span>
+            </div>
+            <!-- AI Summary -->
+            <div style="background: var(--bg-surface); border-radius: 4px; padding: 0.75rem 1rem; margin-bottom: 0.6rem; font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; border-left: 2px solid var(--accent);">
+              <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem;">Summary</div>
+              Added <span style="color: var(--text);">UserPreferences</span> model with theme, notification, and timezone fields. New <span style="color: var(--text);">GET/PUT /preferences</span> endpoints. Handler made async for db pool compatibility.
+            </div>
+            <!-- Expandable file list -->
+            <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.2rem;">
+              <details style="cursor: pointer;">
+                <summary style="display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; list-style: none;">
+                  <span class="chevron-expand" style="color: var(--text-subtle); font-size: 0.55rem; width: 10px;">▶</span>
+                  <span style="color: var(--green); font-size: 0.55rem;">●</span>
+                  <span>models/user.py</span>
+                  <span style="color: var(--text-subtle); font-size: 0.6rem; margin-left: auto;">+14 −0</span>
+                </summary>
+                <div class="diff-preview" style="margin: 0.3rem 0 0.3rem 1.2rem; border-left: 2px solid var(--green);">
+                  <div class="added">+ class UserPreferences(BaseModel):</div>
+                  <div class="added">+     theme: str = "system"</div>
+                  <div class="added">+     notifications: bool = True</div>
+                  <div class="added">+     timezone: str = "UTC"</div>
+                  <div class="context" style="margin-top: 0.2rem;">  ... +10 more lines</div>
+                </div>
+              </details>
+              <details style="cursor: pointer;">
+                <summary style="display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; list-style: none;">
+                  <span class="chevron-expand" style="color: var(--text-subtle); font-size: 0.55rem; width: 10px;">▶</span>
+                  <span style="color: var(--green); font-size: 0.55rem;">●</span>
+                  <span>routes/preferences.py</span>
+                  <span style="color: var(--text-subtle); font-size: 0.6rem; margin-left: auto;">+32 −2</span>
+                </summary>
+                <div class="diff-preview" style="margin: 0.3rem 0 0.3rem 1.2rem; border-left: 2px solid var(--accent);">
+                  <div class="removed">- def get_preferences(user_id: str):</div>
+                  <div class="added">+ async def get_preferences(user_id: str):</div>
+                  <div class="added">+     prefs = await db.get(UserPreferences, user_id)</div>
+                  <div class="added">+     return prefs or UserPreferences()</div>
+                  <div class="context" style="margin-top: 0.2rem;">  ... +28 more lines</div>
+                </div>
+              </details>
+              <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0;">
+                <span style="color: var(--text-subtle); font-size: 0.55rem; width: 10px;"></span>
+                <span style="color: var(--yellow); font-size: 0.55rem;">●</span>
+                <span>middleware/auth.py</span>
+                <span style="color: var(--text-subtle); font-size: 0.6rem; margin-left: auto;">+1 −1</span>
+              </div>
+            </div>
+            <!-- Flagged change -->
+            <div style="margin-top: 0.6rem; background: var(--yellow-dim); border: 1px solid rgba(210, 153, 34, 0.2); border-radius: 4px; padding: 0.6rem 0.9rem; font-size: 0.72rem; color: var(--yellow); line-height: 1.5;">
+              <span style="font-weight: 600;">⚠ Needs attention:</span> <span style="color: var(--text-muted);">middleware/auth.py changed token check from</span> .expired() <span style="color: var(--text-muted);">→</span> .valid() <span style="color: var(--text-muted);">— broader rejection scope. May affect refresh token flow.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="evidence-type">
+          <div class="ev-header">
+            <div class="ev-icon test">✓</div>
+            <h4>Test reports with teeth</h4>
+          </div>
+          <p>Agents write tests that pass but verify nothing. Sodide catches them. Independent trust signals go beyond "green checkmark" — so you know when to dig deeper.</p>
+          <!-- Good test block -->
+          <div style="margin-top: 0.5rem; background: var(--bg); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.85rem 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: var(--green-dim); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 0.6rem;">✓</div>
+              <span style="font-size: 0.78rem; font-weight: 600;">REQ-03: User preference storage</span>
+              <span style="margin-left: auto; font-family: var(--mono); font-size: 0.6rem; color: var(--green);">12 tests passed</span>
+            </div>
+            <div style="font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); display: flex; gap: 1.25rem;">
+              <span>8 unit · 3 integration · 1 e2e</span>
+              <span>pyramid: <span style="color: var(--green);">balanced</span></span>
+            </div>
+          </div>
+          <!-- Vacuous test flagged -->
+          <div style="margin-top: 0.4rem; background: rgba(248, 81, 73, 0.06); border: 1px solid rgba(248, 81, 73, 0.2); border-radius: 6px; padding: 0.85rem 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <div style="width: 18px; height: 18px; border-radius: 50%; background: rgba(248, 81, 73, 0.15); color: #f85149; display: flex; align-items: center; justify-content: center; font-size: 0.6rem;">✗</div>
+              <span style="font-size: 0.78rem; font-weight: 600; color: #f85149;">REQ-07: Rate limiting</span>
+              <span style="margin-left: auto; font-family: var(--mono); font-size: 0.6rem; color: var(--green);">6 tests passed</span>
+            </div>
+            <div style="font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); display: flex; gap: 1.25rem; margin-bottom: 0.5rem;">
+              <span>6 unit · 0 integration · 0 e2e</span>
+              <span>pyramid: <span style="color: var(--yellow);">unbalanced</span></span>
+            </div>
+            <div style="background: rgba(248, 81, 73, 0.08); border-radius: 4px; padding: 0.6rem 0.85rem; font-size: 0.72rem; line-height: 1.5;">
+              <span style="color: #f85149; font-weight: 600;">⚠ Vacuous tests detected:</span> <span style="color: var(--text-muted);">All 6 tests assert</span> <span style="font-family: var(--mono); color: var(--text); font-size: 0.68rem;">assert response.status == 200</span> <span style="color: var(--text-muted);">without verifying rate limit headers or rejection after threshold. Tests pass but verify nothing.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="evidence-type">
+          <div class="ev-header">
+            <div class="ev-icon screenshot">◻</div>
+            <h4>Visual evidence, your way</h4>
+          </div>
+          <p>UI specs capture screenshots. Perf specs run benchmarks. API specs save response snapshots. You define what "verified" means — sodide collects and displays it.</p>
+          <div style="margin-top: 0.6rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <!-- Before screenshot -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden;">
+              <div style="font-family: var(--mono); font-size: 0.55rem; color: var(--text-subtle); padding: 0.35rem 0.6rem; border-bottom: 1px solid var(--border-subtle); text-transform: uppercase; letter-spacing: 0.05em;">Before</div>
+              <div style="padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                <div style="background: var(--bg); border-radius: 3px; height: 12px; width: 60%;"></div>
+                <div style="background: var(--bg); border-radius: 3px; height: 28px; width: 100%; border: 1px solid var(--border-subtle);"></div>
+                <div style="display: flex; gap: 0.4rem;">
+                  <div style="background: var(--bg); border-radius: 3px; height: 28px; flex: 1; border: 1px solid var(--border-subtle);"></div>
+                  <div style="background: var(--bg); border-radius: 3px; height: 28px; width: 60px; border: 1px solid var(--border-subtle);"></div>
+                </div>
+                <div style="background: var(--bg); border-radius: 3px; height: 8px; width: 40%; margin-top: 0.2rem;"></div>
+              </div>
+            </div>
+            <!-- After screenshot -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--green); border-radius: 4px; overflow: hidden;">
+              <div style="font-family: var(--mono); font-size: 0.55rem; color: var(--green); padding: 0.35rem 0.6rem; border-bottom: 1px solid rgba(63, 185, 80, 0.2); text-transform: uppercase; letter-spacing: 0.05em;">After · REQ-03</div>
+              <div style="padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                <div style="background: var(--bg); border-radius: 3px; height: 12px; width: 60%;"></div>
+                <div style="display: flex; gap: 0.4rem;">
+                  <div style="background: var(--bg); border-radius: 3px; height: 28px; flex: 1; border: 1px solid var(--border-subtle);"></div>
+                  <div style="background: var(--bg); border-radius: 3px; height: 28px; flex: 1; border: 1px solid var(--border-subtle);"></div>
+                  <div style="background: var(--bg); border-radius: 3px; height: 28px; flex: 1; border: 1px solid var(--border-subtle);"></div>
+                </div>
+                <div style="background: rgba(63, 185, 80, 0.1); border: 1px solid rgba(63, 185, 80, 0.25); border-radius: 3px; height: 28px; width: 100%;"></div>
+                <div style="display: flex; gap: 0.4rem;">
+                  <div style="background: var(--bg); border-radius: 3px; height: 28px; flex: 1; border: 1px solid var(--border-subtle);"></div>
+                  <div style="background: rgba(88, 166, 255, 0.12); border: 1px solid rgba(88, 166, 255, 0.25); border-radius: 3px; height: 28px; width: 60px;"></div>
+                </div>
+                <div style="background: var(--bg); border-radius: 3px; height: 8px; width: 40%; margin-top: 0.2rem;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="font-family: var(--mono); font-size: 0.6rem; color: var(--text-subtle); margin-top: 0.4rem; text-align: center;">screenshots captured by playwright on each verification run</div>
+        </div>
+
+        <div class="evidence-type">
+          <div class="ev-header">
+            <div class="ev-icon summary">◈</div>
+            <h4>Nothing goes untraced</h4>
+          </div>
+          <p>If a file changed and no requirement asked for it, you'll know. Scope creep, accidental edits, agent hallucinations — all visible before anything merges.</p>
+          <div class="evidence-block" style="margin-top: 0.5rem; border-left-color: var(--yellow);">
+            <span class="ev-label">Scope analysis</span>
+            <span class="metric">4 files</span> modified · <span class="metric">0 files</span> outside scope · <span class="metric">0 untraced</span> changes
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <h2>Ship with evidence, not hope.</h2>
+      <p>Sodide is in early development. Star the repo or join the waitlist for early access.</p>
+      <div class="cta-buttons">
+        <a href="#" class="primary">★ Star on GitHub</a>
+        <a href="#" class="secondary">Get Early Access</a>
+      </div>
+    </section>
+
+    <footer>
+  <div class="verified">● this page was verified by sodide</div>
+  <div>open source · markdown-driven development · built with rust</div>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.querySelector('.mobile-overlay').classList.toggle('open');
+  }
+
+  const sections = document.querySelectorAll('[data-section]');
+  const treeFiles = document.querySelectorAll('.tree-file[data-section]');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.dataset.section;
+        treeFiles.forEach(f => f.classList.remove('active'));
+        const match = document.querySelector(`.tree-file[data-section="${id}"]`);
+        if (match) match.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+
+  treeFiles.forEach(f => {
+    f.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.getElementById(f.dataset.section);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Close sidebar on mobile
+      document.getElementById('sidebar').classList.remove('open');
+      document.querySelector('.mobile-overlay').classList.remove('open');
+    });
+  });
+</script>
+
+</body>
+</html>
